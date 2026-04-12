@@ -3,1265 +3,1347 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Family Meal Planner</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<title>Family Meals</title>
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;700;800&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root {
-  --cream: #FAF7F2;
-  --warm-white: #FFFEF9;
-  --ink: #1C1917;
-  --ink-light: #44403C;
-  --muted: #A8A29E;
-  --border: #E7E5E0;
-  --green: #3D6B4F;
-  --green-light: #EAF2EC;
-  --green-mid: #6B9E7A;
-  --amber: #C2762A;
-  --amber-light: #FEF3E2;
-  --red-soft: #C84B31;
-  --blue-soft: #2A6B9E;
-  --blue-light: #E8F2FE;
-  --purple-soft: #6B4FA8;
-  --purple-light: #F0EBFF;
-  --radius: 12px;
-  --radius-lg: 20px;
-  --shadow: 0 2px 16px rgba(28,25,23,0.08);
-  --shadow-lg: 0 8px 40px rgba(28,25,23,0.14);
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#000;--bg2:#1C1C1E;--bg3:#2C2C2E;--bg4:#3A3A3C;--bg5:#48484A;
+  --sep:rgba(255,255,255,0.07);--sep2:rgba(255,255,255,0.12);
+  --t1:#FFFFFF;--t2:rgba(255,255,255,0.55);--t3:rgba(255,255,255,0.28);
+  --acc:#30D158;--acc-d:rgba(48,209,88,0.14);
+  --ora:#FF9F0A;--ora-d:rgba(255,159,10,0.14);
+  --red:#FF453A;--red-d:rgba(255,69,58,0.14);
+  --blu:#0A84FF;--blu-d:rgba(10,132,255,0.14);
+  --pur:#BF5AF2;--pur-d:rgba(191,90,242,0.14);
+  --tea:#5AC8FA;--tea-d:rgba(90,200,250,0.14);
+  --r:12px;--rl:18px;--rxl:24px;
+  --font:'Nunito',-apple-system,sans-serif;
+  --tab-h:82px;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--cream);
-  color: var(--ink);
-  min-height: 100vh;
-}
+html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--t1);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 
-/* ── NAV ── */
-nav {
-position: sticky; top: 0; z-index: 100;
-background: rgba(250,247,242,0.95);
-backdrop-filter: blur(12px);
-border-bottom: 1px solid var(–border);
-padding: 0 24px;
-display: flex; align-items: center; gap: 0;
-height: 60px;
-}
-.nav-brand {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.2rem; font-weight: 700;
-color: var(–ink); text-decoration: none;
-margin-right: auto;
-}
-.nav-brand span { color: var(–green); }
-.nav-tabs { display: flex; gap: 4px; }
-.nav-tab {
-padding: 8px 16px; border-radius: 8px;
-border: none; background: transparent;
-font-family: ‘DM Sans’, sans-serif;
-font-size: 0.875rem; font-weight: 500;
-color: var(–ink-light); cursor: pointer;
-transition: all 0.15s;
-}
-.nav-tab:hover { background: var(–border); }
-.nav-tab.active { background: var(–ink); color: white; }
-.nav-settings {
-margin-left: 12px; padding: 8px 14px;
-border-radius: 8px; border: 1px solid var(–border);
-background: white; font-size: 0.875rem;
-color: var(–ink-light); cursor: pointer;
-font-family: ‘DM Sans’, sans-serif; font-weight: 500;
-transition: all 0.15s;
-}
-.nav-settings:hover { border-color: var(–ink); color: var(–ink); }
+/* SCREENS */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:1;transition:opacity .18s,transform .22s cubic-bezier(.4,0,.2,1)}
+.screen.hidden{opacity:0;pointer-events:none;transform:translateY(12px)}
+.scroller{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:calc(var(–tab-h) + 20px)}
 
-/* ── VIEWS ── */
-.view { display: none; }
-.view.active { display: block; }
+/* STATUS BAR */
+.sb{height:calc(env(safe-area-inset-top,44px) + 6px);flex-shrink:0}
 
-/* ── HERO WEEK STRIP ── */
-.week-strip {
-background: var(–ink);
-color: white;
-padding: 20px 24px;
-display: flex; align-items: center; gap: 16px;
-flex-wrap: wrap;
-}
-.week-strip h1 {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.6rem; font-weight: 900;
-flex: 1; min-width: 200px;
-}
-.weather-badge {
-display: flex; align-items: center; gap: 8px;
-background: rgba(255,255,255,0.12);
-padding: 8px 14px; border-radius: 8px;
-font-size: 0.85rem;
-}
-.week-nav-btn {
-background: rgba(255,255,255,0.15);
-border: 1px solid rgba(255,255,255,0.2);
-color: white; border-radius: 8px;
-padding: 8px 14px; cursor: pointer;
-font-family: ‘DM Sans’, sans-serif;
-font-size: 0.875rem; font-weight: 500;
-transition: all 0.15s;
-}
-.week-nav-btn:hover { background: rgba(255,255,255,0.25); }
-.week-selector {
-background: rgba(255,255,255,0.12);
-border: 1px solid rgba(255,255,255,0.2);
-color: white; border-radius: 8px;
-padding: 8px 12px; font-size: 0.875rem;
-font-family: ‘DM Sans’, sans-serif;
-cursor: pointer;
-}
-.week-selector option { background: var(–ink); }
+/* LARGE TITLE */
+.pg-title{font-size:32px;font-weight:900;letter-spacing:-.6px;padding:4px 18px 0}
+.pg-sub{font-size:15px;color:var(–t2);padding:3px 18px 14px;font-weight:500}
 
-/* ── WEEK GRID ── */
-.week-grid {
-display: grid;
-grid-template-columns: repeat(7, 1fr);
-gap: 1px;
-background: var(–border);
-border-bottom: 1px solid var(–border);
+/* TAB BAR */
+.tab-bar{
+position:fixed;bottom:0;left:0;right:0;z-index:100;
+height:var(–tab-h);
+background:rgba(18,18,18,.94);
+backdrop-filter:blur(30px) saturate(200%);
+-webkit-backdrop-filter:blur(30px) saturate(200%);
+border-top:1px solid var(–sep);
+display:flex;align-items:flex-start;justify-content:space-around;
+padding:8px 0 0;
+padding-bottom:max(env(safe-area-inset-bottom,0px),10px);
 }
-@media (max-width: 900px) {
-.week-grid { grid-template-columns: 1fr; }
-}
-.day-card {
-background: var(–warm-white);
-padding: 16px;
-cursor: pointer;
-transition: all 0.15s;
-position: relative;
-min-height: 160px;
-}
-.day-card:hover { background: #F5F2EC; transform: translateY(-1px); z-index: 2; box-shadow: var(–shadow); }
-.day-card.anchor { background: #F7F4EF; }
-.day-label {
-font-size: 0.7rem; font-weight: 600;
-text-transform: uppercase; letter-spacing: 0.08em;
-color: var(–muted); margin-bottom: 6px;
-}
-.day-meal-name {
-font-family: ‘Playfair Display’, serif;
-font-size: 1rem; font-weight: 700;
-color: var(–ink); line-height: 1.3;
-margin-bottom: 8px;
-}
-.day-protein-badge {
-display: inline-flex; align-items: center; gap: 4px;
-padding: 3px 8px; border-radius: 20px;
-font-size: 0.75rem; font-weight: 500;
-margin-bottom: 6px;
-}
-.badge-chicken { background: #FEF3E2; color: #92400E; }
-.badge-turkey  { background: #EAF2EC; color: #1A5C2E; }
-.badge-pork    { background: #FEE2E2; color: #991B1B; }
-.badge-beef    { background: #FEE2E2; color: #7F1D1D; }
-.badge-fish    { background: #E8F2FE; color: #1E40AF; }
-.badge-plant   { background: #F0FDF4; color: #166534; }
-.badge-mixed   { background: #F0EBFF; color: #5B21B6; }
-.day-fiber { font-size: 0.75rem; color: var(–muted); }
-.day-batch-flag {
-position: absolute; top: 10px; right: 10px;
-font-size: 0.8rem; opacity: 0.7;
-}
-.taco-stripe { border-top: 3px solid #D97706; }
-.pizza-stripe { border-top: 3px solid #DC2626; }
+.tb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:transparent;cursor:pointer;padding:2px 0;transition:transform .1s}
+.tb:active{transform:scale(.88)}
+.tb-ico{font-size:24px;line-height:1;transition:transform .15s}
+.tb.active .tb-ico{transform:scale(1.12)}
+.tb-lbl{font-size:10px;font-weight:700;color:var(–t3);transition:color .15s;letter-spacing:.02em}
+.tb.active .tb-lbl{color:var(–acc)}
 
-/* ── PROTEIN WEEK BADGE ── */
-.protein-week-bar {
-background: var(–green-light);
-border-bottom: 1px solid var(–border);
-padding: 10px 24px;
-display: flex; align-items: center; gap: 12px;
-flex-wrap: wrap;
-}
-.protein-week-label {
-font-size: 0.8rem; font-weight: 600;
-color: var(–green); text-transform: uppercase; letter-spacing: 0.06em;
-}
-.protein-tag {
-padding: 4px 12px; border-radius: 20px;
-font-size: 0.8rem; font-weight: 500;
-background: var(–green); color: white;
-}
+/* SECTION HEADER */
+.sh{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(–t3);padding:18px 18px 7px}
 
-/* ── SHOPPING SECTION ── */
-.shopping-section {
-padding: 24px;
-max-width: 900px; margin: 0 auto;
-}
-.shopping-header {
-display: flex; align-items: center; justify-content: space-between;
-margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
-}
-.shopping-header h2 {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.5rem;
-}
-.btn {
-padding: 10px 20px; border-radius: 8px;
-border: none; cursor: pointer;
-font-family: ‘DM Sans’, sans-serif;
-font-size: 0.875rem; font-weight: 600;
-transition: all 0.15s;
-display: inline-flex; align-items: center; gap: 6px;
-}
-.btn-primary { background: var(–ink); color: white; }
-.btn-primary:hover { background: var(–ink-light); }
-.btn-green { background: var(–green); color: white; }
-.btn-green:hover { background: #2E5240; }
-.btn-amber { background: var(–amber); color: white; }
-.btn-amber:hover { opacity: 0.9; }
-.btn-outline {
-background: white; color: var(–ink);
-border: 1.5px solid var(–border);
-}
-.btn-outline:hover { border-color: var(–ink); }
+/* GROUPED LIST (iOS settings style) */
+.grp{margin:0 16px 14px;border-radius:var(–rl);overflow:hidden;background:var(–bg2)}
+.grp-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(–sep);min-height:48px}
+.grp-row:last-child{border-bottom:none}
+.grp-row:active{background:var(–bg3)}
+.grp-lbl{flex:1;font-size:16px;font-weight:600}
+.grp-val{font-size:15px;color:var(–t2);font-weight:500}
+.grp-chev{color:var(–t3);font-size:18px;margin-left:4px}
 
-.ingredient-category {
-margin-bottom: 24px;
+/* HERO CARD */
+.hero{
+margin:4px 16px 14px;
+border-radius:var(–rxl);
+padding:22px 18px 18px;
+position:relative;overflow:hidden;
+background:var(–hero-bg,linear-gradient(140deg,#1a2f1e,#0d1a0f));
+border:1px solid var(–hero-border,rgba(48,209,88,.18));
+transition:background .4s,border .4s;
 }
-.ingredient-category h3 {
-font-size: 0.75rem; font-weight: 700;
-text-transform: uppercase; letter-spacing: 0.1em;
-color: var(–muted); margin-bottom: 10px;
-padding-bottom: 6px; border-bottom: 1px solid var(–border);
-}
-.ingredient-item {
-display: flex; align-items: center; gap: 12px;
-padding: 10px 12px; border-radius: 8px;
-margin-bottom: 4px; transition: background 0.1s;
-cursor: pointer;
-}
-.ingredient-item:hover { background: var(–border); }
-.ingredient-item.checked { opacity: 0.45; }
-.ingredient-item.checked .ing-name { text-decoration: line-through; }
-.ing-check {
-width: 20px; height: 20px; border-radius: 5px;
-border: 2px solid var(–border);
-flex-shrink: 0; transition: all 0.15s;
-display: flex; align-items: center; justify-content: center;
-}
-.ingredient-item.checked .ing-check {
-background: var(–green); border-color: var(–green);
-}
-.ingredient-item.checked .ing-check::after {
-content: ‘✓’; color: white; font-size: 12px; font-weight: 700;
-}
-.ing-name { font-size: 0.9rem; font-weight: 500; flex: 1; }
-.ing-qty { font-size: 0.8rem; color: var(–muted); }
-.walmart-btn {
-width: 28px; height: 28px; border-radius: 6px;
-background: #0071CE; border: none; cursor: pointer;
-display: flex; align-items: center; justify-content: center;
-font-size: 0.7rem; color: white; font-weight: 700;
-transition: opacity 0.15s; flex-shrink: 0;
-}
-.walmart-btn:hover { opacity: 0.8; }
+.hero::after{content:’’;position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:var(–hero-glow,radial-gradient(circle,rgba(48,209,88,.1),transparent 70%));pointer-events:none}
+.hero-emoji{font-size:38px;margin-bottom:10px;display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,.3))}
+.hero-wk{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(–hero-acc,#30D158);margin-bottom:3px}
+.hero-name{font-size:24px;font-weight:900;letter-spacing:-.3px;line-height:1.15;margin-bottom:2px}
+.hero-theme{font-size:13px;color:var(–t2);font-weight:600;margin-bottom:14px}
+.hero-chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid transparent}
+.chip-acc{background:var(–acc-d);color:var(–acc);border-color:rgba(48,209,88,.2)}
+.chip-ora{background:var(–ora-d);color:var(–ora);border-color:rgba(255,159,10,.2)}
+.chip-ghost{background:rgba(255,255,255,.07);color:var(–t2);border-color:rgba(255,255,255,.1)}
+.hero-nav{display:flex;gap:8px}
+.hn-btn{flex:1;padding:10px 8px;border-radius:11px;border:none;cursor:pointer;font-family:var(–font);font-size:13px;font-weight:800;transition:opacity .15s}
+.hn-btn:active{opacity:.75}
+.hn-prev{background:rgba(255,255,255,.09);color:var(–t1)}
+.hn-next{background:var(–acc);color:#000}
+.hn-sel{flex:1.5;border-radius:11px;overflow:hidden;background:rgba(255,255,255,.09);border:none}
+.hn-sel select{width:100%;background:transparent;border:none;color:var(–t1);font-size:13px;font-weight:700;font-family:var(–font);padding:10px 12px;cursor:pointer;appearance:none;-webkit-appearance:none}
+.hn-sel select option{background:#1C1C1E}
 
-.shopping-actions {
-display: flex; gap: 10px; margin-top: 24px;
-flex-wrap: wrap;
-}
+/* WEATHER BANNER */
+.wx-banner{margin:0 16px 10px;padding:11px 14px;border-radius:var(–r);background:var(–ora-d);border:1px solid rgba(255,159,10,.2);font-size:13px;font-weight:700;color:var(–ora);display:none;align-items:center;gap:8px}
+.wx-banner.on{display:flex}
 
-/* ── CALENDAR ── */
-.calendar-section { padding: 24px; }
-.cal-header {
-display: flex; align-items: center; gap: 16px;
-margin-bottom: 24px;
+/* DAY CARDS */
+.day-card{
+display:flex;align-items:stretch;
+margin:0 16px 8px;
+background:var(–bg2);border-radius:var(–rl);
+border:1px solid var(–sep);overflow:hidden;
+cursor:pointer;transition:transform .1s,opacity .1s;
 }
-.cal-header h2 {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.5rem; flex: 1;
-}
-.cal-grid {
-display: grid;
-grid-template-columns: repeat(7,1fr);
-gap: 1px; background: var(–border);
-border-radius: var(–radius); overflow: hidden;
-box-shadow: var(–shadow);
-}
-.cal-dow {
-background: var(–ink); color: white;
-text-align: center; padding: 10px 4px;
-font-size: 0.7rem; font-weight: 700;
-text-transform: uppercase; letter-spacing: 0.06em;
-}
-.cal-cell {
-background: var(–warm-white);
-padding: 8px; min-height: 100px;
-cursor: pointer; transition: background 0.1s;
-position: relative;
-}
-.cal-cell:hover { background: #F5F2EC; }
-.cal-cell.empty { background: var(–cream); cursor: default; }
-.cal-cell.today { background: var(–blue-light); }
-.cal-date {
-font-size: 0.75rem; font-weight: 700;
-margin-bottom: 4px; color: var(–ink-light);
-}
-.cal-meal {
-font-size: 0.7rem; line-height: 1.3;
-color: var(–ink); margin-bottom: 2px;
-}
-.cal-meal.taco { color: #D97706; font-weight: 600; }
-.cal-meal.pizza { color: #DC2626; font-weight: 600; }
-.cal-meal-dot {
-display: inline-block; width: 6px; height: 6px;
-border-radius: 50%; margin-right: 4px;
-vertical-align: middle;
-}
+.day-card:active{transform:scale(.975);opacity:.88}
+.dc-bar{width:4px;flex-shrink:0}
+.dc-body{flex:1;padding:13px 12px;min-width:0}
+.dc-day{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(–t3);margin-bottom:3px}
+.dc-name{font-size:15px;font-weight:800;line-height:1.3;color:var(–t1);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.dc-tags{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:800;border-radius:6px;padding:3px 8px}
+.tg-c{background:var(–ora-d);color:var(–ora)}
+.tg-t{background:var(–acc-d);color:var(–acc)}
+.tg-p{background:var(–red-d);color:#FF6B61}
+.tg-f{background:var(–blu-d);color:var(–blu)}
+.tg-v{background:var(–acc-d);color:#34D470}
+.tg-g{background:rgba(48,209,88,.09);color:var(–acc)}
+.tg-b{background:var(–tea-d);color:var(–tea)}
+.tg-th{background:var(–pur-d);color:var(–pur)}
+.dc-chev{display:flex;align-items:center;padding:0 14px;color:var(–t3);font-size:20px;flex-shrink:0}
 
-/* ── MODAL ── */
-.modal-overlay {
-position: fixed; inset: 0; z-index: 200;
-background: rgba(28,25,23,0.6);
-backdrop-filter: blur(4px);
-display: flex; align-items: center; justify-content: center;
-padding: 20px;
-opacity: 0; pointer-events: none;
-transition: opacity 0.2s;
-}
-.modal-overlay.open { opacity: 1; pointer-events: all; }
-.modal {
-background: var(–warm-white);
-border-radius: var(–radius-lg);
-max-width: 680px; width: 100%;
-max-height: 90vh; overflow-y: auto;
-box-shadow: var(–shadow-lg);
-transform: translateY(20px);
-transition: transform 0.2s;
-}
-.modal-overlay.open .modal { transform: translateY(0); }
-.modal-header {
-padding: 28px 28px 0;
-position: sticky; top: 0;
-background: var(–warm-white);
-border-radius: var(–radius-lg) var(–radius-lg) 0 0;
-z-index: 1;
-}
-.modal-close {
-position: absolute; top: 16px; right: 16px;
-width: 32px; height: 32px; border-radius: 50%;
-border: none; background: var(–border);
-cursor: pointer; font-size: 1rem;
-display: flex; align-items: center; justify-content: center;
-transition: background 0.15s;
-}
-.modal-close:hover { background: var(–ink); color: white; }
-.modal-body { padding: 20px 28px 28px; }
-.modal-meal-title {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.6rem; font-weight: 900;
-margin-bottom: 6px; line-height: 1.2;
-}
-.modal-meta {
-display: flex; gap: 8px; flex-wrap: wrap;
-margin-bottom: 20px;
-}
-.meta-pill {
-padding: 4px 12px; border-radius: 20px;
-font-size: 0.75rem; font-weight: 600;
-}
-.meta-time { background: var(–amber-light); color: var(–amber); }
-.meta-serves { background: var(–blue-light); color: var(–blue-soft); }
-.meta-cost { background: var(–green-light); color: var(–green); }
-.meta-gf { background: #F0FDF4; color: #166534; }
-.recipe-section-title {
-font-size: 0.7rem; font-weight: 700;
-text-transform: uppercase; letter-spacing: 0.1em;
-color: var(–muted); margin: 20px 0 10px;
-}
-.recipe-ingredients { list-style: none; }
-.recipe-ingredients li {
-padding: 7px 0;
-border-bottom: 1px solid var(–border);
-font-size: 0.9rem; display: flex; justify-content: space-between;
-}
-.recipe-ingredients li:last-child { border-bottom: none; }
-.ing-amount { color: var(–muted); }
-.recipe-steps { list-style: none; counter-reset: steps; }
-.recipe-steps li {
-counter-increment: steps;
-padding: 10px 0 10px 44px;
-border-bottom: 1px solid var(–border);
-font-size: 0.9rem; line-height: 1.6;
-position: relative;
-}
-.recipe-steps li::before {
-content: counter(steps);
-position: absolute; left: 0; top: 10px;
-width: 28px; height: 28px; border-radius: 50%;
-background: var(–ink); color: white;
-display: flex; align-items: center; justify-content: center;
-font-size: 0.75rem; font-weight: 700;
-}
-.recipe-steps li:last-child { border-bottom: none; }
-.recipe-note {
-margin-top: 16px; padding: 14px 16px;
-background: var(–amber-light); border-radius: 8px;
-font-size: 0.85rem; color: var(–amber);
-border-left: 3px solid var(–amber);
-}
-.gf-note {
-margin-top: 10px; padding: 14px 16px;
-background: var(–green-light); border-radius: 8px;
-font-size: 0.85rem; color: var(–green);
-border-left: 3px solid var(–green);
-}
+/* WEEK ACTION BUTTONS */
+.week-actions{display:flex;gap:8px;margin:0 16px 6px}
+.wa-btn{flex:1;background:var(–bg2);border:1px solid var(–sep2);border-radius:var(–r);padding:12px 8px;color:var(–t1);font-size:13px;font-weight:800;font-family:var(–font);cursor:pointer;text-align:center;transition:background .12s}
+.wa-btn:active{background:var(–bg3)}
+.wa-btn.acc{background:var(–acc);color:#000;border-color:transparent}
+.wa-btn.acc:active{opacity:.82}
 
-/* ── SETTINGS MODAL ── */
-.settings-form { display: grid; gap: 16px; }
-.form-group { display: grid; gap: 6px; }
-.form-group label {
-font-size: 0.8rem; font-weight: 600;
-text-transform: uppercase; letter-spacing: 0.06em;
-color: var(–muted);
+/* BOTTOM SHEET */
+.overlay{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .25s}
+.overlay.on{opacity:1;pointer-events:all}
+.sheet{
+position:fixed;bottom:0;left:0;right:0;z-index:401;
+background:var(–bg2);border-radius:22px 22px 0 0;
+max-height:93vh;display:flex;flex-direction:column;
+transform:translateY(100%);
+transition:transform .32s cubic-bezier(.32,.72,0,1);
+padding-bottom:max(env(safe-area-inset-bottom,0px),16px);
 }
-.form-group input, .form-group select {
-padding: 10px 14px; border-radius: 8px;
-border: 1.5px solid var(–border);
-font-family: ‘DM Sans’, sans-serif;
-font-size: 0.95rem; background: white;
-transition: border-color 0.15s;
-}
-.form-group input:focus, .form-group select:focus {
-outline: none; border-color: var(–ink);
-}
+.overlay.on .sheet{transform:translateY(0)}
+.sh-handle{width:36px;height:5px;border-radius:3px;background:var(–bg5);margin:10px auto 0;flex-shrink:0}
+.sh-hdr{padding:14px 18px 12px;border-bottom:1px solid var(–sep);flex-shrink:0;position:relative}
+.sh-close{position:absolute;top:12px;right:14px;width:30px;height:30px;border-radius:50%;background:var(–bg4);border:none;color:var(–t2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.sh-close:active{background:var(–bg5)}
+.sh-title{font-size:19px;font-weight:900;letter-spacing:-.2px;line-height:1.2;padding-right:36px}
+.sh-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.mc{font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px}
+.mc-t{background:var(–ora-d);color:var(–ora)}
+.mc-s{background:var(–blu-d);color:var(–blu)}
+.mc-c{background:var(–acc-d);color:var(–acc)}
+.mc-g{background:rgba(48,209,88,.09);color:var(–acc)}
+.sh-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.rs-hdr{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(–t3);padding:16px 18px 7px}
+.ing-list{margin:0 16px;border-radius:var(–r);overflow:hidden;background:var(–bg3)}
+.ing-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(–sep)}
+.ing-row:last-child{border-bottom:none}
+.ing-dot{width:7px;height:7px;border-radius:50%;background:var(–acc);flex-shrink:0}
+.ing-name{flex:1;font-size:14px;font-weight:600}
+.ing-qty{font-size:13px;color:var(–t2);font-weight:600}
+.step-list{padding:0 16px;display:flex;flex-direction:column;gap:9px}
+.step-row{display:flex;gap:12px;align-items:flex-start}
+.step-n{width:28px;height:28px;border-radius:9px;background:var(–bg3);color:var(–t1);font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-t{font-size:14px;line-height:1.6;flex:1;padding-top:3px}
+.note-box{margin:12px 16px 4px;padding:12px 14px;border-radius:var(–r);font-size:13px;font-weight:600;line-height:1.55}
+.note-tip{background:var(–ora-d);color:var(–ora);border:1px solid rgba(255,159,10,.18)}
+.note-gf{background:var(–acc-d);color:var(–acc);border:1px solid rgba(48,209,88,.18);margin-top:8px}
 
-/* ── ICAL ── */
-.ical-section {
-padding: 24px;
-max-width: 700px; margin: 0 auto;
-}
-.ical-card {
-background: white; border-radius: var(–radius-lg);
-padding: 28px; box-shadow: var(–shadow);
-border: 1px solid var(–border);
-margin-bottom: 20px;
-}
-.ical-card h3 {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.2rem; margin-bottom: 8px;
-}
-.ical-card p { font-size: 0.9rem; color: var(–ink-light); line-height: 1.6; }
+/* SHOPPING */
+.shop-acts{display:flex;gap:8px;margin:0 16px 4px}
+.sa{flex:1;background:var(–bg2);border:1px solid var(–sep2);border-radius:var(–r);padding:12px 6px;color:var(–t1);font-size:13px;font-weight:800;font-family:var(–font);cursor:pointer;text-align:center;transition:background .12s}
+.sa:active{background:var(–bg3)}
+.sa.wm{background:#0071CE;color:#fff;border-color:transparent}
+.sa.wm:active{opacity:.82}
+.cat-hdr{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(–t3);padding:16px 18px 6px}
+.shop-grp{margin:0 16px 12px;border-radius:var(–rl);overflow:hidden;background:var(–bg2)}
+.ck-row{display:flex;align-items:center;gap:13px;padding:13px 16px;border-bottom:1px solid var(–sep);cursor:pointer;transition:background .1s;min-height:50px}
+.ck-row:last-child{border-bottom:none}
+.ck-row:active{background:var(–bg3)}
+.ck-row.done .ck-name{opacity:.3;text-decoration:line-through}
+.ck-circle{width:24px;height:24px;border-radius:50%;border:2px solid var(–bg5);flex-shrink:0;transition:all .18s;display:flex;align-items:center;justify-content:center}
+.ck-row.done .ck-circle{background:var(–acc);border-color:var(–acc)}
+.ck-chk{font-size:12px;font-weight:900;color:#000;opacity:0;transition:opacity .15s}
+.ck-row.done .ck-chk{opacity:1}
+.ck-name{flex:1;font-size:15px;font-weight:600}
+.ck-qty{font-size:13px;color:var(–t2);font-weight:600;margin-right:6px}
+.w-btn{width:32px;height:32px;border-radius:8px;background:#0071CE;border:none;color:#fff;font-size:11px;font-weight:900;cursor:pointer;flex-shrink:0;transition:opacity .12s}
+.w-btn:active{opacity:.72}
 
-/* ── MISC ── */
-.weather-swap-notice {
-background: #FEF3E2; border: 1px solid #FCD34D;
-border-radius: 8px; padding: 12px 16px;
-font-size: 0.85rem; color: #92400E;
-margin: 16px 24px; display: flex; gap: 8px; align-items: center;
-}
-.loading-spinner {
-display: inline-block; width: 14px; height: 14px;
-border: 2px solid rgba(255,255,255,0.3);
-border-top-color: white; border-radius: 50%;
-animation: spin 0.6s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.toast {
-position: fixed; bottom: 24px; right: 24px; z-index: 300;
-background: var(–ink); color: white;
-padding: 12px 20px; border-radius: 10px;
-font-size: 0.875rem; font-weight: 500;
-box-shadow: var(–shadow-lg);
-transform: translateY(80px); opacity: 0;
-transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-}
-.toast.show { transform: translateY(0); opacity: 1; }
+/* CALENDAR */
+.cal-nav{display:flex;align-items:center;gap:8px;padding:0 16px 14px}
+.cal-nav h2{flex:1;font-size:22px;font-weight:900;letter-spacing:-.3px}
+.cal-nb{width:36px;height:36px;border-radius:10px;background:var(–bg2);border:1px solid var(–sep2);color:var(–t1);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s}
+.cal-nb:active{background:var(–bg3)}
+.cal-wrap{margin:0 16px;border-radius:var(–rl);overflow:hidden;background:var(–bg2);border:1px solid var(–sep)}
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(–sep)}
+.cdow{text-align:center;padding:9px 2px;font-size:11px;font-weight:800;color:var(–t3);text-transform:uppercase;letter-spacing:.04em}
+.cal-cells{display:grid;grid-template-columns:repeat(7,1fr)}
+.cc{min-height:64px;padding:5px 3px;border-right:1px solid var(–sep);border-bottom:1px solid var(–sep);cursor:pointer;overflow:hidden;transition:background .1s}
+.cc:nth-child(7n){border-right:none}
+.cc:active{background:var(–bg3)}
+.cc.emp{cursor:default;background:transparent}
+.cc.emp:active{background:transparent}
+.cc.today .cc-d{color:var(–blu);font-weight:900}
+.cc-d{font-size:13px;font-weight:600;color:var(–t2);text-align:center;margin-bottom:3px}
+.cc-dot{width:5px;height:5px;border-radius:50%;margin:0 auto 2px}
+.cc-m{font-size:9px;font-weight:700;line-height:1.3;text-align:center;color:var(–t2);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.cc-m.taco{color:var(–ora)}
+.cc-m.pizza{color:var(–red)}
+.cal-dl-btn{display:block;margin:12px 16px 0;width:calc(100% - 32px);background:var(–blu);color:#fff;border:none;border-radius:var(–r);padding:14px;font-size:15px;font-weight:800;font-family:var(–font);cursor:pointer;transition:opacity .12s}
+.cal-dl-btn:active{opacity:.8}
+
+/* THEME PICKER SHEET */
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 16px}
+.theme-card{background:var(–bg3);border-radius:var(–rl);padding:14px;cursor:pointer;border:2px solid transparent;transition:all .15s;position:relative;overflow:hidden}
+.theme-card:active{opacity:.8}
+.theme-card.sel{border-color:var(–acc)}
+.tc-emoji{font-size:28px;margin-bottom:6px;display:block}
+.tc-name{font-size:14px;font-weight:800;margin-bottom:2px}
+.tc-desc{font-size:11px;color:var(–t2);font-weight:600;line-height:1.4}
+.tc-check{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;background:var(–acc);display:none;align-items:center;justify-content:center;font-size:11px;color:#000;font-weight:900}
+.theme-card.sel .tc-check{display:flex}
+
+/* PREP SHEET */
+.prep-section{padding:0 16px 8px}
+.prep-card{background:var(–bg3);border-radius:var(–r);padding:14px;margin-bottom:8px}
+.prep-card-title{font-size:14px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:7px}
+.prep-steps{display:flex;flex-direction:column;gap:5px}
+.prep-step{font-size:13px;color:var(–t2);line-height:1.5;padding-left:14px;position:relative}
+.prep-step::before{content:’•’;position:absolute;left:0;color:var(–acc)}
+
+/* SETTINGS */
+.set-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(–sep);background:var(–bg2);min-height:52px}
+.set-row:first-child{border-radius:var(–rl) var(–rl) 0 0}
+.set-row:last-child{border-bottom:none;border-radius:0 0 var(–rl) var(–rl)}
+.set-row:only-child{border-radius:var(–rl)}
+.set-lbl{flex:1;font-size:15px;font-weight:700}
+.set-inp{background:var(–bg4);border:none;color:var(–t1);font-size:15px;font-family:var(–font);font-weight:600;border-radius:8px;padding:6px 10px;width:145px;text-align:right}
+.set-inp:focus{outline:none;background:var(–bg5)}
+.save-btn{display:block;margin:0 16px 8px;width:calc(100% - 32px);background:var(–acc);color:#000;border:none;border-radius:var(–r);padding:15px;font-size:16px;font-weight:900;font-family:var(–font);cursor:pointer;transition:opacity .12s}
+.save-btn:active{opacity:.82}
+
+/* ICAL OPTIONS */
+.ical-row{display:flex;align-items:center;gap:13px;padding:15px 16px;border-bottom:1px solid var(–sep);cursor:pointer;transition:background .1s}
+.ical-row:last-child{border-bottom:none}
+.ical-row:active{background:var(–bg3)}
+.ical-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.ical-inf{flex:1}
+.ical-t{font-size:15px;font-weight:800;margin-bottom:2px}
+.ical-d{font-size:13px;color:var(–t2);font-weight:500;line-height:1.4}
+.ical-chev{color:var(–t3);font-size:20px}
+
+/* TOAST */
+.toast{position:fixed;bottom:calc(var(–tab-h) + 10px);left:50%;transform:translateX(-50%) translateY(16px);background:rgba(38,38,40,.97);backdrop-filter:blur(20px);color:var(–t1);padding:11px 20px;border-radius:20px;font-size:14px;font-weight:700;white-space:nowrap;z-index:999;opacity:0;transition:all .28s cubic-bezier(.34,1.56,.64,1);border:1px solid var(–sep2);box-shadow:0 6px 28px rgba(0,0,0,.45);pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 
 </head>
 <body>
 
-<nav>
-  <a class="nav-brand" href="#"><span>🥗</span> Family Meals</a>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchView('planner')">This Week</button>
-    <button class="nav-tab" onclick="switchView('shopping')">Shopping</button>
-    <button class="nav-tab" onclick="switchView('calendar')">Calendar</button>
-    <button class="nav-tab" onclick="switchView('ical')">iCal</button>
+<!-- ══ WEEK SCREEN ═══════════════════════════════════════ -->
+
+<div id="s-week" class="screen">
+  <div class="sb"></div>
+  <div class="scroller">
+    <div class="pg-title">Dinners</div>
+    <div class="pg-sub" id="wk-sub">Week 1 · Winter</div>
+    <div id="wx-banner" class="wx-banner">☀️ Hot week — lighter meals recommended</div>
+    <div class="hero" id="hero-card">
+      <span class="hero-emoji" id="h-emoji">🌿</span>
+      <div class="hero-wk" id="h-wk">Week 1</div>
+      <div class="hero-name" id="h-name">Winter Rotation</div>
+      <div class="hero-theme" id="h-theme">Classic Family Meals</div>
+      <div class="hero-chips">
+        <span class="chip chip-acc" id="h-protein">🍗 Turkey week</span>
+        <span class="chip chip-ghost" id="h-wx" style="display:none">🌤 —</span>
+      </div>
+      <div class="hero-nav">
+        <button class="hn-btn hn-prev" onclick="goWk(currentWeek-1)">← Prev</button>
+        <div class="hn-sel"><select id="wk-sel" onchange="goWk(parseInt(this.value))"></select></div>
+        <button class="hn-btn hn-next" onclick="goWk(currentWeek+1)">Next →</button>
+      </div>
+    </div>
+    <div class="week-actions">
+      <button class="wa-btn" onclick="openPrepSheet()">📋 Week Prep</button>
+      <button class="wa-btn" onclick="openAllRecipes()">📖 All Recipes</button>
+      <button class="wa-btn acc" onclick="openThemePicker()">🎨 Theme</button>
+    </div>
+    <div class="sh">This Week</div>
+    <div id="day-list"></div>
   </div>
-  <button class="nav-settings" onclick="openSettings()">⚙ Settings</button>
-</nav>
+</div>
+
+<!-- ══ SHOPPING SCREEN ═══════════════════════════════════ -->
+
+<div id="s-shop" class="screen hidden">
+  <div class="sb"></div>
+  <div class="scroller">
+    <div class="pg-title">Shopping</div>
+    <div class="pg-sub" id="shop-sub">Week 1 · Check what you have</div>
+    <div class="shop-acts">
+      <button class="sa" onclick="clearChecked()">Clear ✓</button>
+      <button class="sa" onclick="copyList()">Copy 📋</button>
+      <button class="sa wm" onclick="walmartAll()">🛒 Walmart</button>
+    </div>
+    <div id="shop-content"></div>
+  </div>
+</div>
+
+<!-- ══ CALENDAR SCREEN ═══════════════════════════════════ -->
+
+<div id="s-cal" class="screen hidden">
+  <div class="sb"></div>
+  <div class="scroller">
+    <div class="pg-title">Calendar</div>
+    <div class="cal-nav">
+      <h2 id="cal-hd">Month</h2>
+      <button class="cal-nb" onclick="chMonth(-1)">‹</button>
+      <button class="cal-nb" onclick="chMonth(1)">›</button>
+    </div>
+    <div class="cal-wrap" id="cal-wrap"></div>
+    <button class="cal-dl-btn" onclick="dlICS('month')">⬇ Download Month iCal</button>
+    <div style="height:8px"></div>
+  </div>
+</div>
+
+<!-- ══ MORE SCREEN ════════════════════════════════════════ -->
+
+<div id="s-more" class="screen hidden">
+  <div class="sb"></div>
+  <div class="scroller">
+    <div class="pg-title">More</div>
+    <div class="sh">iCal Export</div>
+    <div class="grp">
+      <div class="ical-row" onclick="dlICS('week')">
+        <div class="ical-ico" style="background:var(--blu-d)">📅</div>
+        <div class="ical-inf"><div class="ical-t">This Week</div><div class="ical-d">Download Week <span id="ical-wn">1</span> .ics</div></div>
+        <div class="ical-chev">›</div>
+      </div>
+      <div class="ical-row" onclick="dlICS('month')">
+        <div class="ical-ico" style="background:var(--pur-d)">🗓</div>
+        <div class="ical-inf"><div class="ical-t">This Month</div><div class="ical-d" id="ical-md">Download month .ics</div></div>
+        <div class="ical-chev">›</div>
+      </div>
+      <div class="ical-row" onclick="dlICS('all')">
+        <div class="ical-ico" style="background:var(--acc-d)">📆</div>
+        <div class="ical-inf"><div class="ical-t">All Weeks</div><div class="ical-d">Import full rotation (.ics)</div></div>
+        <div class="ical-chev">›</div>
+      </div>
+    </div>
+    <div class="sh">Settings</div>
+    <div style="margin:0 16px 14px">
+      <div class="set-row"><span class="set-lbl">📍 ZIP Code</span><input class="set-inp" id="s-zip" type="text" placeholder="97201" maxlength="5"></div>
+      <div class="set-row"><span class="set-lbl">📅 Week 1 Start</span><input class="set-inp" id="s-date" type="date"></div>
+      <div class="set-row"><span class="set-lbl">👨‍👩‍👧‍👦 Family</span><select class="set-inp" id="s-fam"><option value="4">4 people</option><option value="2">2 people</option><option value="6">6 people</option></select></div>
+    </div>
+    <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+    <div class="sh">About</div>
+    <div class="grp" style="padding:14px 16px"><p style="font-size:13px;color:var(--t2);line-height:1.75;font-weight:500">26-week rotating dinner plan · 100% gluten free · Acid reflux safe · Single main protein per week · Kid-friendly · Budget $75–100/week · Taco Tuesday + Pizza Friday every week</p></div>
+    <div style="height:10px"></div>
+  </div>
+</div>
+
+<!-- ══ TAB BAR ════════════════════════════════════════════ -->
+
+<div class="tab-bar">
+  <button class="tb active" onclick="switchTab('week',this)"><div class="tb-ico">🍽</div><div class="tb-lbl">This Week</div></button>
+  <button class="tb" onclick="switchTab('shop',this)"><div class="tb-ico">🛒</div><div class="tb-lbl">Shopping</div></button>
+  <button class="tb" onclick="switchTab('cal',this)"><div class="tb-ico">📆</div><div class="tb-lbl">Calendar</div></button>
+  <button class="tb" onclick="switchTab('more',this)"><div class="tb-ico">⋯</div><div class="tb-lbl">More</div></button>
+</div>
+
+<!-- ══ RECIPE SHEET ════════════════════════════════════════ -->
+
+<div id="ov-recipe" class="overlay" onclick="closeOverlay('ov-recipe',event)">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-hdr">
+      <button class="sh-close" onclick="closeSheet('ov-recipe')">✕</button>
+      <div class="sh-title" id="r-title"></div>
+      <div class="sh-meta" id="r-meta"></div>
+    </div>
+    <div class="sh-body" id="r-body"></div>
+  </div>
+</div>
+
+<!-- ══ ALL RECIPES SHEET ══════════════════════════════════ -->
+
+<div id="ov-allrec" class="overlay" onclick="closeOverlay('ov-allrec',event)">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-hdr">
+      <button class="sh-close" onclick="closeSheet('ov-allrec')">✕</button>
+      <div class="sh-title">All Recipes · Week <span id="ar-wn">1</span></div>
+    </div>
+    <div class="sh-body" id="ar-body"></div>
+  </div>
+</div>
+
+<!-- ══ PREP SHEET ══════════════════════════════════════════ -->
+
+<div id="ov-prep" class="overlay" onclick="closeOverlay('ov-prep',event)">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-hdr">
+      <button class="sh-close" onclick="closeSheet('ov-prep')">✕</button>
+      <div class="sh-title">Week Prep Guide</div>
+      <div class="sh-meta"><span class="mc mc-t">Week <span class="prep-wn">1</span></span><span class="mc mc-g">✓ GF throughout</span></div>
+    </div>
+    <div class="sh-body" id="prep-body"></div>
+  </div>
+</div>
+
+<!-- ══ THEME PICKER ═══════════════════════════════════════ -->
+
+<div id="ov-theme" class="overlay" onclick="closeOverlay('ov-theme',event)">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-hdr">
+      <button class="sh-close" onclick="closeSheet('ov-theme')">✕</button>
+      <div class="sh-title">Choose Week Theme</div>
+    </div>
+    <div class="sh-body"><div class="theme-grid" id="theme-grid"></div></div>
+  </div>
+</div>
 
 <div id="toast" class="toast"></div>
 
-<!-- PLANNER VIEW -->
-
-<div id="view-planner" class="view active">
-  <div class="week-strip">
-    <div>
-      <div style="font-size:0.7rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px" id="season-label"></div>
-      <h1 id="week-heading">Week 1</h1>
-    </div>
-    <div id="weather-badge" class="weather-badge" style="display:none">
-      <span id="weather-icon">🌤</span>
-      <span id="weather-text">Loading weather...</span>
-    </div>
-    <select class="week-selector" id="week-selector" onchange="goToWeek(parseInt(this.value))"></select>
-    <button class="week-nav-btn" onclick="goToWeek(currentWeek-1)">← Prev</button>
-    <button class="week-nav-btn" onclick="goToWeek(currentWeek+1)">Next →</button>
-  </div>
-  <div id="weather-swap-notice" class="weather-swap-notice" style="display:none">
-    ☀️ <strong>Hot weather detected!</strong> Heavy soups have been swapped for lighter meals this week.
-  </div>
-  <div id="protein-week-bar" class="protein-week-bar">
-    <span class="protein-week-label">This week's protein:</span>
-    <span id="protein-tag" class="protein-tag"></span>
-  </div>
-  <div id="week-grid" class="week-grid"></div>
-</div>
-
-<!-- SHOPPING VIEW -->
-
-<div id="view-shopping" class="view">
-  <div class="shopping-section">
-    <div class="shopping-header">
-      <h2>🛒 Week <span id="shop-week-num">1</span> Shopping List</h2>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-outline" onclick="clearChecked()">Clear checks</button>
-        <button class="btn btn-outline" onclick="exportShoppingList()">📋 Copy list</button>
-        <button class="btn btn-green" onclick="downloadICS('week')">⬇ iCal for week</button>
-      </div>
-    </div>
-    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px">
-      Check off items you already have. Then use the Walmart 🛒 buttons to search each remaining item.
-    </p>
-    <div id="shopping-list-content"></div>
-    <div class="shopping-actions">
-      <button class="btn btn-primary" onclick="openWalmartAll()">🛒 Search all unchecked on Walmart</button>
-      <button class="btn btn-outline" onclick="switchView('planner')">← Back to planner</button>
-    </div>
-  </div>
-</div>
-
-<!-- CALENDAR VIEW -->
-
-<div id="view-calendar" class="view">
-  <div class="calendar-section">
-    <div class="cal-header">
-      <h2 id="cal-month-heading">April 2025</h2>
-      <button class="btn btn-outline" onclick="changeMonth(-1)">← Prev</button>
-      <button class="btn btn-outline" onclick="changeMonth(1)">Next →</button>
-      <button class="btn btn-green" onclick="downloadICS('month')">⬇ Download Month iCal</button>
-    </div>
-    <div id="cal-grid-wrap"></div>
-  </div>
-</div>
-
-<!-- ICAL VIEW -->
-
-<div id="view-ical" class="view">
-  <div class="ical-section">
-    <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:8px">📅 iCal Export</h2>
-    <p style="color:var(--muted);margin-bottom:28px">Download calendar files to import into Apple Calendar, Google Calendar, or Outlook.</p>
-    <div class="ical-card">
-      <h3>Current Week</h3>
-      <p>Download a .ics file for the currently selected week. Each dinner night becomes a calendar event with the full meal name and notes.</p>
-      <br>
-      <button class="btn btn-primary" onclick="downloadICS('week')">⬇ Download Week <span id="ical-week-num">1</span> iCal</button>
-    </div>
-    <div class="ical-card">
-      <h3>Full 26-Week Plan</h3>
-      <p>Download all 26 weeks as a single .ics file. Import once and see every dinner night on your calendar for the whole rotation cycle.</p>
-      <br>
-      <button class="btn btn-green" onclick="downloadICS('all')">⬇ Download All 26 Weeks</button>
-    </div>
-    <div class="ical-card">
-      <h3>Current Month</h3>
-      <p>Download just the current calendar month view.</p>
-      <br>
-      <button class="btn btn-outline" onclick="downloadICS('month')">⬇ Download <span id="ical-month-name">Month</span> iCal</button>
-    </div>
-  </div>
-</div>
-
-<!-- RECIPE MODAL -->
-
-<div id="recipe-modal" class="modal-overlay" onclick="closeModal(event)">
-  <div class="modal">
-    <div class="modal-header">
-      <button class="modal-close" onclick="closeRecipeModal()">✕</button>
-      <div id="modal-content-header"></div>
-    </div>
-    <div class="modal-body" id="modal-content-body"></div>
-  </div>
-</div>
-
-<!-- SETTINGS MODAL -->
-
-<div id="settings-modal" class="modal-overlay" onclick="closeSettingsModal(event)">
-  <div class="modal" style="max-width:480px">
-    <div class="modal-header">
-      <button class="modal-close" onclick="closeSettingsModal()">✕</button>
-      <div style="padding-bottom:16px">
-        <div style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;padding-top:8px">Settings</div>
-      </div>
-    </div>
-    <div class="modal-body">
-      <div class="settings-form">
-        <div class="form-group">
-          <label>Your ZIP Code (for weather)</label>
-          <input type="text" id="setting-zip" placeholder="e.g. 97201" maxlength="5">
-        </div>
-        <div class="form-group">
-          <label>Plan Start Date (Week 1 = ?)</label>
-          <input type="date" id="setting-start-date">
-        </div>
-        <div class="form-group">
-          <label>Family Size</label>
-          <select id="setting-family-size">
-            <option value="4" selected>4 people (default)</option>
-            <option value="2">2 people</option>
-            <option value="6">6 people</option>
-          </select>
-        </div>
-        <button class="btn btn-primary" onclick="saveSettings()" style="margin-top:8px">Save Settings</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
+// ════════════════════════════════════════════════════════════════
+// THEMES  (20 themes)
+// ════════════════════════════════════════════════════════════════
+const THEMES = [
+  {id:'classic',  name:'Classic Family',   emoji:'🏠', desc:'Comfort food staples the whole family loves',
+   heroGrad:'linear-gradient(140deg,#1a2c1e,#0d1a0f)', heroBorder:'rgba(48,209,88,.18)', heroGlow:'radial-gradient(circle,rgba(48,209,88,.1),transparent 70%)', heroAcc:'#30D158'},
+  {id:'mexican',  name:'Mexican Fiesta',   emoji:'🇲🇽', desc:'Tacos, enchiladas, pozole & more',
+   heroGrad:'linear-gradient(140deg,#2d1a0a,#1a0d04)', heroBorder:'rgba(255,159,10,.22)', heroGlow:'radial-gradient(circle,rgba(255,159,10,.12),transparent 70%)', heroAcc:'#FF9F0A'},
+  {id:'greek',    name:'Greek Week',        emoji:'🫒', desc:'Mediterranean flavors — lemon, olive, herb',
+   heroGrad:'linear-gradient(140deg,#0d1f2d,#050f1a)', heroBorder:'rgba(90,200,250,.2)', heroGlow:'radial-gradient(circle,rgba(90,200,250,.1),transparent 70%)', heroAcc:'#5AC8FA'},
+  {id:'italian',  name:'Italian Kitchen',  emoji:'🍝', desc:'Pasta, risotto, polenta & slow-cooked sauces',
+   heroGrad:'linear-gradient(140deg,#2a0a0a,#160404)', heroBorder:'rgba(255,69,58,.2)', heroGlow:'radial-gradient(circle,rgba(255,69,58,.1),transparent 70%)', heroAcc:'#FF453A'},
+  {id:'asian',    name:'Asian Fusion',     emoji:'🥢', desc:'Stir-fries, rice bowls, teriyaki & peanut noodles',
+   heroGrad:'linear-gradient(140deg,#1a0d2d,#0d0618)', heroBorder:'rgba(191,90,242,.2)', heroGlow:'radial-gradient(circle,rgba(191,90,242,.1),transparent 70%)', heroAcc:'#BF5AF2'},
+  {id:'bbq',      name:'BBQ & Grill',      emoji:'🔥', desc:'Smoky grilled proteins, corn, slaws & sides',
+   heroGrad:'linear-gradient(140deg,#2d1200,#180900)', heroBorder:'rgba(255,69,58,.25)', heroGlow:'radial-gradient(circle,rgba(255,69,58,.14),transparent 70%)', heroAcc:'#FF6B35'},
+  {id:'indian',   name:'Indian Spice',     emoji:'🫙', desc:'Mild curries, dal, tikka & rice — GF-safe',
+   heroGrad:'linear-gradient(140deg,#2d1f00,#1a1000)', heroBorder:'rgba(255,159,10,.22)', heroGlow:'radial-gradient(circle,rgba(255,204,10,.1),transparent 70%)', heroAcc:'#FFCC0A'},
+  {id:'japanese', name:'Japanese Night',   emoji:'🍱', desc:'Teriyaki, miso-glazed salmon, edamame rice',
+   heroGrad:'linear-gradient(140deg,#0a1a2d,#050d18)', heroBorder:'rgba(10,132,255,.2)', heroGlow:'radial-gradient(circle,rgba(10,132,255,.1),transparent 70%)', heroAcc:'#0A84FF'},
+  {id:'thai',     name:'Thai Flavors',     emoji:'🌺', desc:'Coconut curries, peanut noodles, lemongrass soup',
+   heroGrad:'linear-gradient(140deg,#1a2d0a,#0d1804)', heroBorder:'rgba(48,209,88,.18)', heroGlow:'radial-gradient(circle,rgba(48,209,88,.1),transparent 70%)', heroAcc:'#34D470'},
+  {id:'korean',   name:'Korean Inspired',  emoji:'🥘', desc:'Bibimbap bowls, bulgogi, japchae (GF noodles)',
+   heroGrad:'linear-gradient(140deg,#2d0a1a,#180410)', heroBorder:'rgba(255,69,58,.2)', heroGlow:'radial-gradient(circle,rgba(255,69,58,.1),transparent 70%)', heroAcc:'#FF453A'},
+  {id:'moroccan', name:'Moroccan Nights',  emoji:'🏺', desc:'Tagines, couscous swapped for quinoa, harissa',
+   heroGrad:'linear-gradient(140deg,#2d1a00,#1a0f00)', heroBorder:'rgba(255,159,10,.2)', heroGlow:'radial-gradient(circle,rgba(255,204,80,.1),transparent 70%)', heroAcc:'#FFA830'},
+  {id:'soul',     name:'Soul Food',        emoji:'🍗', desc:'Slow-braised chicken, sweet potato, greens',
+   heroGrad:'linear-gradient(140deg,#1a0d00,#0f0800)', heroBorder:'rgba(255,159,10,.18)', heroGlow:'radial-gradient(circle,rgba(255,159,10,.1),transparent 70%)', heroAcc:'#FF9F0A'},
+  {id:'hawaiian', name:'Hawaiian Plate',   emoji:'🌺', desc:'Poke-style bowls, teriyaki, tropical fruit sides',
+   heroGrad:'linear-gradient(140deg,#001a2d,#000f18)', heroBorder:'rgba(90,200,250,.2)', heroGlow:'radial-gradient(circle,rgba(90,200,250,.12),transparent 70%)', heroAcc:'#5AC8FA'},
+  {id:'french',   name:'French Bistro',    emoji:'🥐', desc:'Coq au vin (GF), ratatouille, herby roasted veg',
+   heroGrad:'linear-gradient(140deg,#1a0a1a,#0f0610)', heroBorder:'rgba(191,90,242,.18)', heroGlow:'radial-gradient(circle,rgba(191,90,242,.1),transparent 70%)', heroAcc:'#BF5AF2'},
+  {id:'persian',  name:'Persian Table',    emoji:'🌹', desc:'Herb-rice (tahdig), slow-braised chicken, saffron',
+   heroGrad:'linear-gradient(140deg,#2d1a0a,#18100a)', heroBorder:'rgba(255,159,10,.2)', heroGlow:'radial-gradient(circle,rgba(255,185,10,.1),transparent 70%)', heroAcc:'#FFB80A'},
+  {id:'tex-mex',  name:'Tex-Mex',         emoji:'🤠', desc:'Fajitas, smothered bowls, queso (no tomato-heavy)',
+   heroGrad:'linear-gradient(140deg,#2d1500,#1a0d00)', heroBorder:'rgba(255,159,10,.22)', heroGlow:'radial-gradient(circle,rgba(255,159,10,.12),transparent 70%)', heroAcc:'#FF9F0A'},
+  {id:'seafood',  name:'Seafood Night',    emoji:'🐟', desc:'Salmon, shrimp, cod — grilled, baked, pan-seared',
+   heroGrad:'linear-gradient(140deg,#001a2d,#00101f)', heroBorder:'rgba(10,132,255,.2)', heroGlow:'radial-gradient(circle,rgba(10,132,255,.1),transparent 70%)', heroAcc:'#0A84FF'},
+  {id:'plant',    name:'Plant-Based Week', emoji:'🥦', desc:'Bean bowls, lentil dal, veggie-packed dinners',
+   heroGrad:'linear-gradient(140deg,#0a2d0a,#051805)', heroBorder:'rgba(48,209,88,.22)', heroGlow:'radial-gradient(circle,rgba(48,209,88,.14),transparent 70%)', heroAcc:'#30D158'},
+  {id:'comfort',  name:'Cozy Comfort',    emoji:'🫕', desc:'Soups, stews, pot pies & slow-cooker meals',
+   heroGrad:'linear-gradient(140deg,#1a100a,#0f0a08)', heroBorder:'rgba(255,159,10,.18)', heroGlow:'radial-gradient(circle,rgba(255,159,10,.1),transparent 70%)', heroAcc:'#FF9F0A'},
+  {id:'summer',   name:'Summer Light',    emoji:'☀️', desc:'Cold noodles, grain salads, grilled everything',
+   heroGrad:'linear-gradient(140deg,#1a1a00,#0f0f00)', heroBorder:'rgba(255,204,10,.2)', heroGlow:'radial-gradient(circle,rgba(255,204,10,.1),transparent 70%)', heroAcc:'#FFD60A'},
+];
 
-// ══════════════════════════════════════════════════════════════════
-// DATA
-// ══════════════════════════════════════════════════════════════════
-
-const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-
-// Master ingredient categories
-const CATS = {
-  produce: '🥕 Produce',
-  protein: '🥩 Protein',
-  dairy: '🧀 Dairy & Eggs',
-  pantry: '🥫 Pantry',
-  frozen: '🧊 Frozen',
-  bread: '🍞 Bread & Bakery',
-  canned: '🥡 Canned Goods',
-  spices: '🌿 Spices & Seasonings',
-};
-
-// ── 26 WEEKS DATA ──
-// Each week: { season, protein (main weekly protein), weatherSwap (optional lighter version), days: [{night, meal, protein, badge, anchor, batch, recipe}] }
-// Recipe: { time, serves, cost, gf, ingredients:[{name,qty,cat}], steps:[], note, gfNote }
-
-const WEEKS = [
-{season:'Winter', protein:'Turkey', days:[
- {night:'Sunday', meal:'Slow Cooker Pulled Turkey Bowls', badge:'turkey', batch:true,
-  recipe:{time:'15 min prep + 6 hrs slow cook', serves:6, cost:'~$18', gf:true,
-   ingredients:[
-    {name:'Bone-in turkey thighs (3–4)',qty:'3 lbs',cat:'protein'},
-    {name:'Sweet potatoes',qty:'3 medium',cat:'produce'},
-    {name:'Green beans (fresh or frozen)',qty:'12 oz',cat:'produce'},
-    {name:'GF chicken broth (Pacific Foods)',qty:'1 cup',cat:'canned'},
-    {name:'Garlic powder',qty:'1 tsp',cat:'spices'},
-    {name:'Smoked paprika',qty:'1 tsp',cat:'spices'},
-    {name:'Cumin',qty:'½ tsp',cat:'spices'},
-    {name:'Salt & pepper',qty:'to taste',cat:'spices'},
-    {name:'Jasmine rice',qty:'2 cups dry',cat:'pantry'},
-   ],
-   steps:[
-    'Season turkey thighs with garlic powder, paprika, cumin, salt and pepper.',
-    'Place in slow cooker with broth. Cook on LOW 6–8 hours or HIGH 3–4 hours.',
-    'Cube sweet potatoes, toss with olive oil and salt, roast at 425°F for 25 min.',
-    'Steam or microwave green beans until tender, 4–5 min.',
-    'Shred turkey with two forks. Discard skin and bones.',
-    'Serve shredded turkey over rice with sweet potato and green beans alongside.',
-    '🧊 BATCH TIP: Double the turkey. Freeze extra shredded meat in 1-cup zip bags for future taco nights.',
-   ],
-   note:'Leftovers: Turkey rice bowls Monday + taco filling Tuesday.',
-   gfNote:'⚠️ Check broth label — Pacific Foods and Kitchen Basics are GF certified.'}},
- {night:'Monday', meal:'Turkey Rice Bowls (leftover)', badge:'turkey',
-  recipe:{time:'10 min', serves:4, cost:'~$3', gf:true,
-   ingredients:[{name:'Leftover pulled turkey',qty:'2 cups',cat:'protein'},{name:'Jasmine rice',qty:'cooked',cat:'pantry'},{name:'Zucchini',qty:'1 medium',cat:'produce'},{name:'Tamari (GF soy sauce)',qty:'1 tbsp',cat:'pantry'},{name:'Olive oil',qty:'1 tbsp',cat:'pantry'}],
-   steps:['Sauté sliced zucchini in olive oil 4–5 min until golden.','Reheat leftover turkey in a skillet with a splash of broth or water.','Serve turkey and zucchini over rice. Drizzle with tamari.'],
-   gfNote:'⚠️ Use tamari (San-J GF) not regular soy sauce.'}},
- {night:'Tuesday', meal:'🌮 Taco Tuesday — Ground Turkey Classic', badge:'turkey', anchor:'taco',
-  recipe:{time:'20 min', serves:4, cost:'~$12', gf:true,
-   ingredients:[{name:'Ground turkey',qty:'1.5 lbs',cat:'protein'},{name:'Corn tortillas',qty:'12',cat:'bread'},{name:'GF taco seasoning (McCormick)',qty:'1 packet',cat:'spices'},{name:'Shredded cabbage',qty:'2 cups',cat:'produce'},{name:'Avocado',qty:'2',cat:'produce'},{name:'Mild salsa',qty:'½ cup',cat:'canned'},{name:'Black beans (canned)',qty:'1 can',cat:'canned'},{name:'Sour cream',qty:'¼ cup',cat:'dairy'},{name:'Shredded cheese',qty:'1 cup',cat:'dairy'}],
-   steps:['Brown ground turkey in skillet over medium-high heat, breaking apart, 6–7 min.','Add taco seasoning and ¼ cup water. Stir and simmer 3 min.','Warm corn tortillas in a dry skillet or wrapped in damp paper towel in microwave.','Drain and warm black beans with a pinch of cumin.','Set up a taco bar: turkey, cabbage, diced avocado, salsa, sour cream, cheese.','Let kids assemble their own!'],
-   gfNote:'⚠️ Corn tortillas are naturally GF. Check taco seasoning — McCormick Original is GF certified.'}},
- {night:'Wednesday', meal:'Turkey Taco Bowls (leftover)', badge:'turkey',
-  recipe:{time:'10 min', serves:4, cost:'~$3', gf:true,
-   ingredients:[{name:'Leftover taco turkey',qty:'1.5 cups',cat:'protein'},{name:'Jasmine rice',qty:'cooked',cat:'pantry'},{name:'Black beans',qty:'½ cup',cat:'canned'},{name:'Corn',qty:'½ cup',cat:'frozen'},{name:'Avocado',qty:'1',cat:'produce'}],
-   steps:['Reheat turkey and beans.','Layer rice, turkey, beans, corn, and diced avocado in a bowl.','Top with a dollop of sour cream or salsa verde if desired.'],
-   gfNote:'All components naturally GF.'}},
- {night:'Thursday', meal:'White Bean & Kale Soup', badge:'plant', batch:true,
-  recipe:{time:'10 min prep + 25 min cook', serves:6, cost:'~$10', gf:true,
-   ingredients:[{name:'Cannellini beans (2 cans)',qty:'30 oz',cat:'canned'},{name:'Kale (curly or lacinato)',qty:'1 bunch',cat:'produce'},{name:'Carrots',qty:'3 medium',cat:'produce'},{name:'Yukon gold potato',qty:'2 medium',cat:'produce'},{name:'GF chicken or veggie broth',qty:'5 cups',cat:'canned'},{name:'Garlic',qty:'3 cloves',cat:'produce'},{name:'Olive oil',qty:'2 tbsp',cat:'pantry'},{name:'Rosemary (dried)',qty:'1 tsp',cat:'spices'},{name:'Salt & pepper',qty:'to taste',cat:'spices'}],
-   steps:['Dice carrots and potato into ½" cubes. Mince garlic. Strip kale from stems, chop.','Sauté garlic in olive oil in large pot over medium heat, 1 min.','Add carrots and potato, cook 4 min stirring occasionally.','Add broth, beans, and rosemary. Bring to boil, reduce heat, simmer 15 min until potato is tender.','Add kale, stir in, simmer 5 more min.','Season with salt and pepper. Serve with GF crackers.','🧊 BATCH TIP: Make a double batch. Freeze in quart bags — excellent quick weeknight dinner.'],
-   gfNote:'⚠️ Check broth label for GF certification. No flour thickener needed — beans thicken naturally.'}},
- {night:'Friday', meal:'🍕 Pizza Friday — BBQ Chicken', badge:'chicken', anchor:'pizza',
-  recipe:{time:'25 min', serves:4, cost:'~$14', gf:true,
-   ingredients:[{name:'TJ\'s GF frozen pizza crust',qty:'2 crusts',cat:'frozen'},{name:'Rotisserie chicken (pulled)',qty:'1.5 cups',cat:'protein'},{name:'Sweet Baby Ray\'s BBQ sauce (GF)',qty:'⅓ cup',cat:'pantry'},{name:'Mozzarella (shredded)',qty:'2 cups',cat:'dairy'},{name:'Red onion',qty:'½',cat:'produce'},{name:'Frozen corn',qty:'½ cup',cat:'frozen'}],
-   steps:['Preheat oven to 425°F.','Thinly slice red onion. Thaw corn.','Spread a thin layer of BBQ sauce over crust — less is more for reflux.','Top with mozzarella, pulled chicken, corn, and onion slices.','Bake 12–15 min until cheese is bubbly and crust edges are golden.'],
-   gfNote:'⚠️ Sweet Baby Ray\'s Original BBQ sauce is GF. Avoid flavored varieties without checking. TJ\'s GF crust: confirm package says gluten free.'}},
- {night:'Saturday', meal:'Sheet Pan Chicken Thighs & Root Veg', badge:'chicken',
-  recipe:{time:'10 min prep + 35 min cook', serves:4, cost:'~$14', gf:true,
-   ingredients:[{name:'Bone-in chicken thighs',qty:'4–6 pieces',cat:'protein'},{name:'Carrots',qty:'3',cat:'produce'},{name:'Parsnips',qty:'2',cat:'produce'},{name:'Sweet potato',qty:'2 medium',cat:'produce'},{name:'Olive oil',qty:'3 tbsp',cat:'pantry'},{name:'Garlic powder',qty:'1 tsp',cat:'spices'},{name:'Dried rosemary',qty:'1 tsp',cat:'spices'},{name:'Salt & pepper',qty:'to taste',cat:'spices'}],
-   steps:['Preheat oven to 425°F. Line a large sheet pan with foil.','Chop all root veg into 1" chunks.','Toss veg with 2 tbsp olive oil, salt, and rosemary. Spread on pan.','Rub chicken with 1 tbsp oil, garlic powder, salt, pepper. Place on top of veg.','Roast 35–40 min, flipping veg halfway, until chicken reaches 165°F.'],
-   note:'Leftovers make great chicken salad for Sunday prep.',
-   gfNote:'All ingredients naturally GF. Check any seasoning blends for hidden gluten.'}},
+// ════════════════════════════════════════════════════════════════
+// WEEK DATA (4 base + theme-specific overrides)
+// ════════════════════════════════════════════════════════════════
+const BASE_WEEKS = [
+{season:'Winter',protein:'Turkey',themeId:'classic',days:[
+ {n:'Sunday',   m:'Slow Cooker Pulled Turkey Bowls',b:'turkey',batch:true,
+  r:{t:'15 min + 6 hr',sv:6,cost:'~$18',gf:true,
+   i:[{n:'Bone-in turkey thighs',q:'3 lbs',c:'protein'},{n:'Sweet potatoes',q:'3 medium',c:'produce'},{n:'Green beans',q:'12 oz',c:'produce'},{n:'GF chicken broth',q:'1 cup',c:'canned'},{n:'Garlic powder',q:'1 tsp',c:'spices'},{n:'Smoked paprika',q:'1 tsp',c:'spices'},{n:'Cumin',q:'½ tsp',c:'spices'},{n:'Jasmine rice',q:'2 cups dry',c:'pantry'},{n:'Olive oil',q:'2 tbsp',c:'pantry'}],
+   s:['Season turkey thighs with garlic powder, paprika, cumin, salt, pepper.','Place in slow cooker with broth on LOW 6–8 hrs or HIGH 3–4 hrs.','Cube sweet potatoes, toss with olive oil and salt, roast 425°F 25 min.','Steam green beans 4–5 min until tender-crisp.','Shred turkey with two forks. Discard skin and bones.','Serve over jasmine rice with sweet potato and green beans.','🧊 Double the turkey — freeze extra in 1-cup bags for future taco nights.'],
+   note:'Leftovers power Monday bowls and Tuesday taco meat.',
+   gfn:'⚠️ Pacific Foods and Kitchen Basics broth are GF certified. Always check label.'}},
+ {n:'Monday',   m:'Turkey Rice Bowls',b:'turkey',
+  r:{t:'10 min',sv:4,cost:'~$3',gf:true,
+   i:[{n:'Leftover pulled turkey',q:'2 cups',c:'protein'},{n:'Jasmine rice (cooked)',q:'2 cups',c:'pantry'},{n:'Zucchini',q:'1 medium',c:'produce'},{n:'Tamari (San-J GF)',q:'1 tbsp',c:'pantry'},{n:'Olive oil',q:'1 tbsp',c:'pantry'}],
+   s:['Sauté sliced zucchini in olive oil 4–5 min until golden.','Reheat leftover turkey with a splash of broth.','Serve over rice. Drizzle with tamari.'],
+   gfn:'⚠️ Tamari only — regular soy sauce contains wheat.'}},
+ {n:'Tuesday',  m:'🌮 Taco Tuesday — Ground Turkey',b:'turkey',anchor:'taco',
+  r:{t:'20 min',sv:4,cost:'~$12',gf:true,
+   i:[{n:'Ground turkey',q:'1.5 lbs',c:'protein'},{n:'Corn tortillas',q:'12',c:'bread'},{n:'GF taco seasoning (McCormick)',q:'1 pkt',c:'spices'},{n:'Shredded cabbage',q:'2 cups',c:'produce'},{n:'Avocado',q:'2',c:'produce'},{n:'Mild salsa',q:'½ cup',c:'canned'},{n:'Black beans',q:'1 can',c:'canned'},{n:'Sour cream',q:'¼ cup',c:'dairy'},{n:'Shredded cheese',q:'1 cup',c:'dairy'}],
+   s:['Brown ground turkey in skillet, breaking apart, 6–7 min.','Add taco seasoning and ¼ cup water. Simmer 3 min.','Warm corn tortillas in dry skillet or microwave.','Drain and warm black beans with a pinch of cumin.','Set up taco bar — let kids build their own!'],
+   gfn:'⚠️ Corn tortillas naturally GF. McCormick Original taco seasoning is GF certified.'}},
+ {n:'Wednesday',m:'Turkey Taco Bowls',b:'turkey',
+  r:{t:'10 min',sv:4,cost:'~$3',gf:true,
+   i:[{n:'Leftover taco turkey',q:'1.5 cups',c:'protein'},{n:'Jasmine rice (cooked)',q:'2 cups',c:'pantry'},{n:'Black beans',q:'½ cup',c:'canned'},{n:'Frozen corn',q:'½ cup',c:'frozen'},{n:'Avocado',q:'1',c:'produce'}],
+   s:['Reheat turkey and beans.','Layer rice, turkey, beans, corn, and diced avocado.','Top with sour cream or salsa verde.'],
+   gfn:'All naturally GF.'}},
+ {n:'Thursday', m:'White Bean & Kale Soup',b:'plant',batch:true,
+  r:{t:'10 min + 25 min',sv:6,cost:'~$10',gf:true,
+   i:[{n:'Cannellini beans (2 cans)',q:'30 oz',c:'canned'},{n:'Kale',q:'1 bunch',c:'produce'},{n:'Carrots',q:'3 medium',c:'produce'},{n:'Yukon gold potato',q:'2 medium',c:'produce'},{n:'GF chicken broth',q:'5 cups',c:'canned'},{n:'Garlic',q:'3 cloves',c:'produce'},{n:'Olive oil',q:'2 tbsp',c:'pantry'},{n:'Rosemary (dried)',q:'1 tsp',c:'spices'}],
+   s:['Dice carrots, potato. Mince garlic. Strip and chop kale.','Sauté garlic in olive oil 1 min. Add veg, cook 4 min.','Add broth, beans, rosemary. Boil then simmer 15 min until potato tender.','Add kale, simmer 5 more min. Season with salt and pepper.','🧊 Make double — freeze in quart bags.'],
+   gfn:'⚠️ Check broth label for GF. No flour needed — beans thicken naturally.'}},
+ {n:'Friday',   m:'🍕 Pizza Friday — BBQ Chicken',b:'chicken',anchor:'pizza',
+  r:{t:'25 min',sv:4,cost:'~$14',gf:true,
+   i:[{n:"TJ's GF frozen pizza crust",q:'2',c:'frozen'},{n:'Rotisserie chicken (pulled)',q:'1.5 cups',c:'protein'},{n:"Sweet Baby Ray's BBQ sauce (GF)",q:'⅓ cup',c:'pantry'},{n:'Shredded mozzarella',q:'2 cups',c:'dairy'},{n:'Red onion (thin sliced)',q:'½',c:'produce'},{n:'Frozen corn',q:'½ cup',c:'frozen'}],
+   s:['Preheat oven to 425°F.','Spread thin layer of BBQ sauce over crust — less is more for reflux.','Top with mozzarella, pulled chicken, corn, and sliced onion.','Bake 12–15 min until cheese bubbly and crust golden.'],
+   gfn:"⚠️ Sweet Baby Ray's Original is GF. TJ's GF crust is certified GF."}},
+ {n:'Saturday', m:'Sheet Pan Chicken & Root Veg',b:'chicken',
+  r:{t:'10 min + 35 min',sv:4,cost:'~$14',gf:true,
+   i:[{n:'Bone-in chicken thighs',q:'4–6',c:'protein'},{n:'Carrots',q:'3 medium',c:'produce'},{n:'Parsnips',q:'2 medium',c:'produce'},{n:'Sweet potato',q:'2 medium',c:'produce'},{n:'Olive oil',q:'3 tbsp',c:'pantry'},{n:'Garlic powder',q:'1 tsp',c:'spices'},{n:'Dried rosemary',q:'1 tsp',c:'spices'}],
+   s:['Preheat oven to 425°F. Line a large sheet pan with foil.','Chop root veg into 1" chunks. Toss with 2 tbsp olive oil, salt, rosemary.','Rub chicken with 1 tbsp oil, garlic powder, salt, pepper. Place on top of veg.','Roast 35–40 min, flipping veg halfway, until chicken reaches 165°F.'],
+   note:'Leftovers make great chicken salad for next-day lunch.',
+   gfn:'All naturally GF. Check seasoning blends for hidden wheat starch.'}},
 ]},
-{season:'Winter', protein:'Turkey', days:[
- {night:'Sunday', meal:'🧊 Instant Pot Turkey Chili', badge:'turkey', batch:true,
-  recipe:{time:'20 min prep + 30 min IP', serves:8, cost:'~$16', gf:true,
-   ingredients:[{name:'Ground turkey',qty:'2 lbs',cat:'protein'},{name:'Bell peppers (mixed)',qty:'2',cat:'produce'},{name:'Black beans (2 cans)',qty:'30 oz',cat:'canned'},{name:'Kidney beans (1 can)',qty:'15 oz',cat:'canned'},{name:'Frozen corn',qty:'1 cup',cat:'frozen'},{name:'GF chicken broth',qty:'1.5 cups',cat:'canned'},{name:'Mild chili powder',qty:'2 tsp',cat:'spices'},{name:'Cumin',qty:'1 tsp',cat:'spices'},{name:'Garlic powder',qty:'1 tsp',cat:'spices'},{name:'Salt',qty:'to taste',cat:'spices'},{name:'Shredded cheese',qty:'for topping',cat:'dairy'},{name:'Sour cream',qty:'for topping',cat:'dairy'}],
-   steps:['Set Instant Pot to Sauté. Brown ground turkey, breaking apart, 5 min.','Add diced bell peppers, spices, stir 2 min.','Add beans (drained), corn, and broth. Stir well.','Seal lid. Set to HIGH pressure 12 min. Natural release 10 min.','Open, stir. Chili thickens naturally from beans — no flour needed.','Serve with shredded cheese and sour cream on top.','🧊 BATCH: Freeze half in quart containers — chili freezes perfectly for 3 months.'],
-   gfNote:'⚠️ No flour thickener needed. Check broth label for GF. McCormick chili powder is GF.'}},
- {night:'Monday', meal:'Chili Rice Bowls (leftover)', badge:'turkey',
-  recipe:{time:'10 min', serves:4, cost:'~$3', gf:true,
-   ingredients:[{name:'Leftover turkey chili',qty:'3 cups',cat:'protein'},{name:'Jasmine rice',qty:'2 cups cooked',cat:'pantry'},{name:'Shredded cheese',qty:'½ cup',cat:'dairy'},{name:'Sour cream',qty:'¼ cup',cat:'dairy'}],
-   steps:['Reheat chili on stovetop or microwave.','Serve over rice. Top with cheese and sour cream.'],
-   gfNote:'All GF.'}},
- {night:'Tuesday', meal:'🌮 Taco Tuesday — Chicken Fajita', badge:'chicken', anchor:'taco',
-  recipe:{time:'25 min', serves:4, cost:'~$13', gf:true,
-   ingredients:[{name:'Chicken breast or thighs',qty:'1.5 lbs',cat:'protein'},{name:'Corn tortillas',qty:'12',cat:'bread'},{name:'Bell peppers (2 colors)',qty:'2',cat:'produce'},{name:'Onion (cooked — not raw)',qty:'1 medium',cat:'produce'},{name:'GF fajita seasoning',qty:'2 tsp',cat:'spices'},{name:'Avocado',qty:'2',cat:'produce'},{name:'Sour cream',qty:'¼ cup',cat:'dairy'},{name:'Pinto beans',qty:'1 can',cat:'canned'}],
-   steps:['Slice chicken into strips. Season with fajita spice, salt, pepper.','Cook chicken in hot skillet with oil 5–6 min per side until done.','In same pan, sauté sliced bell peppers and onion 6–8 min until soft and slightly charred.','Warm corn tortillas.','Assemble: chicken, peppers, avocado, sour cream.','Serve pinto beans (warmed with cumin) on the side.'],
-   note:'Cooked onion is well-tolerated by most acid reflux patients vs. raw onion.',
-   gfNote:'⚠️ Check fajita seasoning — make your own with cumin, paprika, garlic powder, oregano to be safe.'}},
- {night:'Wednesday', meal:'Sheet Pan Sausage & Veggies', badge:'pork',
-  recipe:{time:'10 min prep + 25 min cook', serves:4, cost:'~$13', gf:true,
-   ingredients:[{name:'GF chicken sausage (Aidells)',qty:'4 links',cat:'protein'},{name:'Zucchini',qty:'2 medium',cat:'produce'},{name:'Yellow squash',qty:'1',cat:'produce'},{name:'Sweet potato',qty:'2 medium',cat:'produce'},{name:'Olive oil',qty:'2 tbsp',cat:'pantry'},{name:'Italian seasoning',qty:'1 tsp',cat:'spices'},{name:'Salt & pepper',qty:'to taste',cat:'spices'}],
-   steps:['Preheat oven to 400°F.','Slice sausage into rounds. Chop all veg into 1" pieces.','Toss veg with olive oil, Italian seasoning, salt, pepper.','Spread on sheet pan, add sausage rounds.','Roast 25 min, stirring halfway, until veg is caramelized.'],
-   gfNote:'⚠️ Aidells Chicken & Apple Sausage is GF certified. Always verify package label.'}},
- {night:'Thursday', meal:'🧊 Red Lentil & Carrot Soup', badge:'plant', batch:true,
-  recipe:{time:'10 min prep + 25 min cook', serves:6, cost:'~$9', gf:true,
-   ingredients:[{name:'Red lentils',qty:'1.5 cups dry',cat:'pantry'},{name:'Carrots',qty:'4 medium',cat:'produce'},{name:'Sweet potato',qty:'1 medium',cat:'produce'},{name:'GF broth',qty:'5 cups',cat:'canned'},{name:'Coconut milk (canned)',qty:'½ cup',cat:'canned'},{name:'Cumin',qty:'1 tsp',cat:'spices'},{name:'Ground ginger',qty:'½ tsp',cat:'spices'},{name:'Turmeric',qty:'¼ tsp',cat:'spices'},{name:'Garlic',qty:'2 cloves',cat:'produce'},{name:'Olive oil',qty:'1 tbsp',cat:'pantry'}],
-   steps:['Rinse lentils well. Dice carrots and sweet potato.','Sauté garlic in olive oil 1 min. Add carrots, sweet potato, spices, stir 3 min.','Add lentils and broth. Bring to boil, reduce heat, simmer 20 min until lentils are completely soft.','Stir in coconut milk. Use immersion blender for half the soup for a creamy-chunky texture, or leave as-is.','Season with salt.','🧊 BATCH: Doubles beautifully. Freeze in quart bags.'],
-   gfNote:'All naturally GF. Check broth label.'}},
- {night:'Friday', meal:'🍕 Pizza Friday — Margherita (olive oil base)', badge:'mixed', anchor:'pizza',
-  recipe:{time:'20 min', serves:4, cost:'~$13', gf:true,
-   ingredients:[{name:'TJ\'s GF frozen pizza crust',qty:'2',cat:'frozen'},{name:'Olive oil',qty:'2 tbsp',cat:'pantry'},{name:'Garlic',qty:'2 cloves',cat:'produce'},{name:'Fresh mozzarella',qty:'8 oz',cat:'dairy'},{name:'Fresh basil',qty:'handful',cat:'produce'},{name:'Cherry tomatoes',qty:'handful (light)',cat:'produce'}],
-   steps:['Preheat oven to 425°F.','Mince garlic into olive oil. Brush over crust.','Tear fresh mozzarella and distribute. Add a few halved cherry tomatoes (go light for reflux).','Bake 12–15 min.','Top with fresh basil after baking.'],
-   note:'Olive oil base is much gentler on acid reflux than a heavy tomato sauce.',
-   gfNote:'TJ\'s GF crust is gluten free. Fresh mozzarella and basil are naturally GF.'}},
- {night:'Saturday', meal:'Honey-Glazed Baked Chicken Drumsticks', badge:'chicken',
-  recipe:{time:'10 min prep + 40 min cook', serves:4, cost:'~$13', gf:true,
-   ingredients:[{name:'Chicken drumsticks',qty:'8',cat:'protein'},{name:'Sweet potato',qty:'2 medium',cat:'produce'},{name:'Green beans (fresh)',qty:'12 oz',cat:'produce'},{name:'Honey',qty:'3 tbsp',cat:'pantry'},{name:'Garlic powder',qty:'1 tsp',cat:'spices'},{name:'Smoked paprika',qty:'1 tsp',cat:'spices'},{name:'Olive oil',qty:'2 tbsp',cat:'pantry'},{name:'Salt & pepper',qty:'to taste',cat:'spices'}],
-   steps:['Preheat oven to 425°F.','Mix honey, garlic powder, paprika, olive oil, salt, pepper.','Coat drumsticks in glaze. Place on foil-lined sheet pan.','Cube sweet potato. Toss with olive oil and salt on separate part of pan.','Roast 35–40 min until chicken reaches 165°F. Add green beans last 10 min.'],
-   gfNote:'Pure honey is GF. Check any glazes or marinades for hidden malt vinegar.'}},
+{season:'Winter',protein:'Turkey',themeId:'classic',days:[
+ {n:'Sunday', m:'🧊 Instant Pot Turkey Chili',b:'turkey',batch:true,
+  r:{t:'20 min + 30 min IP',sv:8,cost:'~$16',gf:true,
+   i:[{n:'Ground turkey',q:'2 lbs',c:'protein'},{n:'Bell peppers (mixed)',q:'2',c:'produce'},{n:'Black beans (2 cans)',q:'30 oz',c:'canned'},{n:'Kidney beans',q:'1 can',c:'canned'},{n:'Frozen corn',q:'1 cup',c:'frozen'},{n:'GF chicken broth',q:'1.5 cups',c:'canned'},{n:'Mild chili powder',q:'2 tsp',c:'spices'},{n:'Cumin',q:'1 tsp',c:'spices'},{n:'Garlic powder',q:'1 tsp',c:'spices'},{n:'Shredded cheese',q:'for topping',c:'dairy'},{n:'Sour cream',q:'for topping',c:'dairy'}],
+   s:['Set IP to Sauté. Brown ground turkey 5 min, breaking apart.','Add diced peppers and spices. Stir 2 min.','Add beans (drained), corn, broth. Stir.','Seal lid. HIGH pressure 12 min. Natural release 10 min.','Chili thickens naturally — no flour needed.','🧊 Freeze half in quart containers.'],
+   gfn:'⚠️ GF broth required. No flour thickener. McCormick chili powder is GF.'}},
+ {n:'Monday', m:'Chili Rice Bowls',b:'turkey',
+  r:{t:'10 min',sv:4,cost:'~$3',gf:true,
+   i:[{n:'Leftover turkey chili',q:'3 cups',c:'protein'},{n:'Jasmine rice (cooked)',q:'2 cups',c:'pantry'},{n:'Shredded cheese',q:'½ cup',c:'dairy'},{n:'Sour cream',q:'¼ cup',c:'dairy'}],
+   s:['Reheat chili.','Serve over rice. Top with cheese and sour cream.'],
+   gfn:'All GF.'}},
+ {n:'Tuesday', m:'🌮 Taco Tuesday — Chicken Fajita',b:'chicken',anchor:'taco',
+  r:{t:'25 min',sv:4,cost:'~$13',gf:true,
+   i:[{n:'Chicken breast or thighs',q:'1.5 lbs',c:'protein'},{n:'Corn tortillas',q:'12',c:'bread'},{n:'Bell peppers (2 colors)',q:'2',c:'produce'},{n:'Onion (cooked)',q:'1 medium',c:'produce'},{n:'GF fajita seasoning',q:'2 tsp',c:'spices'},{n:'Avocado',q:'2',c:'produce'},{n:'Sour cream',q:'¼ cup',c:'dairy'},{n:'Pinto beans',q:'1 can',c:'canned'}],
+   s:['Slice chicken into strips. Season with fajita spice, salt, pepper.','Cook in hot oiled skillet 5–6 min per side.','Same pan: sauté sliced peppers and onion 6–8 min until soft.','Warm corn tortillas. Assemble with chicken, peppers, avocado, sour cream.'],
+   note:'Cooked onion is much gentler on acid reflux than raw.',
+   gfn:'⚠️ DIY fajita spice: 1 tsp cumin + ½ tsp paprika + ¼ tsp garlic powder + salt.'}},
+ {n:'Wednesday', m:'Sheet Pan Sausage & Veg',b:'pork',
+  r:{t:'10 min + 25 min',sv:4,cost:'~$13',gf:true,
+   i:[{n:'GF chicken sausage (Aidells)',q:'4 links',c:'protein'},{n:'Zucchini',q:'2 medium',c:'produce'},{n:'Yellow squash',q:'1 medium',c:'produce'},{n:'Sweet potato',q:'2 medium',c:'produce'},{n:'Olive oil',q:'2 tbsp',c:'pantry'},{n:'Italian seasoning',q:'1 tsp',c:'spices'}],
+   s:['Preheat oven to 400°F.','Slice sausage into rounds. Chop all veg into 1" pieces.','Toss veg with oil, seasoning, salt, pepper. Spread on sheet pan with sausage.','Roast 25 min, stirring halfway.'],
+   gfn:'⚠️ Aidells Chicken & Apple Sausage is GF certified.'}},
+ {n:'Thursday', m:'🧊 Red Lentil & Carrot Soup',b:'plant',batch:true,
+  r:{t:'10 min + 25 min',sv:6,cost:'~$9',gf:true,
+   i:[{n:'Red lentils',q:'1.5 cups dry',c:'pantry'},{n:'Carrots',q:'4 medium',c:'produce'},{n:'Sweet potato',q:'1 medium',c:'produce'},{n:'GF broth',q:'5 cups',c:'canned'},{n:'Coconut milk',q:'½ cup',c:'canned'},{n:'Cumin',q:'1 tsp',c:'spices'},{n:'Ginger',q:'½ tsp',c:'spices'},{n:'Turmeric',q:'¼ tsp',c:'spices'},{n:'Garlic',q:'2 cloves',c:'produce'},{n:'Olive oil',q:'1 tbsp',c:'pantry'}],
+   s:['Rinse lentils. Dice carrots and sweet potato.','Sauté garlic in oil 1 min. Add veg and spices, stir 3 min.','Add lentils and broth. Boil then simmer 20 min until lentils soft.','Stir in coconut milk. Blend half with immersion blender.','🧊 Freeze half in quart bags.'],
+   gfn:'All naturally GF. Check broth label.'}},
+ {n:'Friday', m:'🍕 Pizza Friday — Margherita',b:'mixed',anchor:'pizza',
+  r:{t:'20 min',sv:4,cost:'~$13',gf:true,
+   i:[{n:"TJ's GF frozen pizza crust",q:'2',c:'frozen'},{n:'Olive oil',q:'2 tbsp',c:'pantry'},{n:'Garlic',q:'2 cloves',c:'produce'},{n:'Fresh mozzarella',q:'8 oz',c:'dairy'},{n:'Fresh basil',q:'handful',c:'produce'},{n:'Cherry tomatoes (light)',q:'handful',c:'produce'}],
+   s:['Preheat oven to 425°F.','Mince garlic into olive oil. Brush over crust.','Tear mozzarella and distribute. Add a few halved cherry tomatoes.','Bake 12–15 min. Top with fresh basil after baking.'],
+   note:'Olive oil base is much gentler on acid reflux than heavy tomato sauce.',
+   gfn:'All naturally GF. Go light on tomatoes for reflux.'}},
+ {n:'Saturday', m:'Honey-Glazed Chicken Drumsticks',b:'chicken',
+  r:{t:'10 min + 40 min',sv:4,cost:'~$13',gf:true,
+   i:[{n:'Chicken drumsticks',q:'8',c:'protein'},{n:'Sweet potato',q:'2 medium',c:'produce'},{n:'Green beans',q:'12 oz',c:'produce'},{n:'Honey',q:'3 tbsp',c:'pantry'},{n:'Garlic powder',q:'1 tsp',c:'spices'},{n:'Smoked paprika',q:'1 tsp',c:'spices'},{n:'Olive oil',q:'2 tbsp',c:'pantry'}],
+   s:['Preheat oven to 425°F.','Mix honey, garlic powder, paprika, olive oil, salt, pepper.','Coat drumsticks in glaze. Place on foil-lined sheet pan. Add cubed sweet potato.','Roast 35–40 min to 165°F. Add green beans the last 10 min.'],
+   gfn:'Pure honey is naturally GF.'}},
 ]},
-{season:'Spring', protein:'Chicken', days:[
- {night:'Sunday', meal:'🧊 Instant Pot Chicken Burrito Bowls', badge:'chicken', batch:true,
-  recipe:{time:'15 min prep + 20 min IP', serves:6, cost:'~$16', gf:true,
-   ingredients:[{name:'Bone-in chicken thighs',qty:'4–6',cat:'protein'},{name:'Jasmine rice',qty:'2 cups dry',cat:'pantry'},{name:'Black beans (2 cans)',qty:'30 oz',cat:'canned'},{name:'Frozen corn',qty:'1 cup',cat:'frozen'},{name:'GF chicken broth',qty:'1 cup',cat:'canned'},{name:'Mild salsa verde',qty:'½ cup',cat:'canned'},{name:'Cumin',qty:'1 tsp',cat:'spices'},{name:'Garlic powder',qty:'1 tsp',cat:'spices'},{name:'Shredded cheese',qty:'1 cup',cat:'dairy'},{name:'Sour cream',qty:'½ cup',cat:'dairy'},{name:'Avocado',qty:'2',cat:'produce'}],
-   steps:['Season chicken with cumin, garlic powder, salt.','Place chicken in Instant Pot. Add broth and salsa verde.','Seal and cook HIGH pressure 15 min. Natural release 10 min.','Shred chicken. Cook rice separately.','Warm beans with cumin.','Build bowls: rice, chicken, beans, corn, cheese, sour cream, avocado.','🧊 BATCH TIP: Cook 8 thighs. Freeze extra shredded chicken in 1-cup bags — powers 2–3 future taco nights.'],
-   note:'Salsa verde is lower acid than tomato salsa — better for reflux.',
-   gfNote:'⚠️ Check broth and salsa verde labels for GF. Most salsa verde (tomatillo-based) is naturally GF.'}},
- {night:'Monday', meal:'Burrito Bowls (leftover)', badge:'chicken',
-  recipe:{time:'10 min', serves:4, cost:'~$3', gf:true,
-   ingredients:[{name:'Leftover chicken and rice',qty:'4 cups',cat:'protein'},{name:'Shredded cheese',qty:'½ cup',cat:'dairy'},{name:'Corn',qty:'½ cup',cat:'frozen'},{name:'Avocado',qty:'1',cat:'produce'}],
-   steps:['Reheat chicken and rice.','Top with cheese, corn, avocado.'],
-   gfNote:'All GF.'}},
- {night:'Tuesday', meal:'🌮 Taco Tuesday — Shrimp Tacos', badge:'fish', anchor:'taco',
-  recipe:{time:'20 min', serves:4, cost:'~$15', gf:true,
-   ingredients:[{name:'Medium shrimp (peeled, deveined)',qty:'1.5 lbs',cat:'protein'},{name:'Corn tortillas',qty:'12',cat:'bread'},{name:'Shredded cabbage',qty:'2 cups',cat:'produce'},{name:'Avocado',qty:'2',cat:'produce'},{name:'Sour cream',qty:'¼ cup',cat:'dairy'},{name:'Lime (zest only)',qty:'1',cat:'produce'},{name:'Garlic powder',qty:'1 tsp',cat:'spices'},{name:'Mild paprika',qty:'½ tsp',cat:'spices'},{name:'Butter',qty:'1 tbsp',cat:'dairy'},{name:'Pinto beans',qty:'1 can',cat:'canned'}],
-   steps:['Pat shrimp dry. Season with garlic powder, paprika, salt.','Cook in butter over medium-high heat 1–2 min per side until pink.','Make lime crema: mix sour cream with lime ZEST (not juice) — zest is lower acid.','Warm tortillas.','Build tacos: shrimp, cabbage, avocado, crema.','Serve warmed pinto beans on the side.'],
-   note:'Using lime zest instead of juice keeps the bright citrus flavor while reducing acid content.',
-   gfNote:'Shrimp is naturally GF. Check any seasoning blends. Corn tortillas are GF.'}},
- {night:'Wednesday', meal:'Turkey & Rice Stuffed Bell Peppers', badge:'turkey',
-  recipe:{time:'20 min prep + 35 min bake', serves:4, cost:'~$14', gf:true,
-   ingredients:[{name:'Ground turkey',qty:'1 lb',cat:'protein'},{name:'Bell peppers (4 large)',qty:'4',cat:'produce'},{name:'Jasmine rice',qty:'1 cup cooked',cat:'pantry'},{name:'Frozen corn',qty:'½ cup',cat:'frozen'},{name:'Mild shredded cheese',qty:'1 cup',cat:'dairy'},{name:'GF chicken broth',qty:'¼ cup',cat:'canned'},{name:'Cumin',qty:'1 tsp',cat:'spices'},{name:'Garlic powder',qty:'½ tsp',cat:'spices'}],
-   steps:['Preheat oven to 375°F.','Cut tops off peppers, remove seeds. Place in baking dish.','Brown turkey in skillet. Season with cumin, garlic powder, salt.','Mix turkey with rice, corn, and broth. Fill peppers.','Top each pepper with cheese.','Cover with foil. Bake 30 min. Remove foil, bake 5 more min until cheese melts.'],
-   note:'Using broth instead of tomato sauce keeps this reflux-friendly while keeping the filling moist.',
-   gfNote:'⚠️ GF broth required. Skip any tomato sauce — not needed here.'}},
- {night:'Thursday', meal:'🫘 Spring Pea & Mint Risotto', badge:'plant',
-  recipe:{time:'30 min active', serves:4, cost:'~$10', gf:true,
-   ingredients:[{name:'Arborio rice',qty:'1.5 cups',cat:'pantry'},{name:'Frozen sweet peas',qty:'2 cups',cat:'frozen'},{name:'GF broth (warm)',qty:'5–6 cups',cat:'canned'},{name:'Parmesan (grated)',qty:'½ cup',cat:'dairy'},{name:'Fresh mint',qty:'handful',cat:'produce'},{name:'Butter',qty:'2 tbsp',cat:'dairy'},{name:'Onion (cooked)',qty:'1 small',cat:'produce'},{name:'Olive oil',qty:'1 tbsp',cat:'pantry'},{name:'Salt & pepper',qty:'to taste',cat:'spices'}],
-   steps:['Warm broth in a separate pot.','Sauté diced onion in olive oil and butter in wide pan, 5 min.','Add arborio rice, stir 2 min until lightly toasted.','Add warm broth one ladle at a time, stirring constantly and waiting until absorbed before adding more (about 20 min total).','Stir in peas in the last 3 min.','Remove from heat, stir in parmesan, butter, and chopped fresh mint.','Season with salt and pepper.'],
-   note:'Arborio (risotto) rice is naturally gluten free. A luxurious plant-based dinner.',
-   gfNote:'⚠️ Arborio rice is GF. Check broth label. Parmesan is GF.'}},
- {night:'Friday', meal:'🍕 Pizza Friday — Pesto Chicken Spring', badge:'chicken', anchor:'pizza',
-  recipe:{time:'25 min', serves:4, cost:'~$15', gf:true,
-   ingredients:[{name:'TJ\'s GF frozen pizza crust',qty:'2',cat:'frozen'},{name:'Basil pesto (see note)',qty:'¼ cup',cat:'pantry'},{name:'Rotisserie chicken',qty:'1.5 cups pulled',cat:'protein'},{name:'Fresh mozzarella',qty:'8 oz',cat:'dairy'},{name:'Baby spinach',qty:'1 cup',cat:'produce'},{name:'Artichoke hearts (canned)',qty:'½ cup',cat:'canned'}],
-   steps:['Preheat oven to 425°F.','Spread pesto thinly over crust.','Layer spinach, torn mozzarella, chicken, and drained artichoke hearts.','Bake 12–15 min until cheese is melted and edges golden.'],
-   gfNote:'⚠️ Make homemade pesto to guarantee GF: blend basil, olive oil, parmesan, pine nuts, garlic. Kirkland brand pesto is also GF. Avoid jarred pesto without checking label.'}},
- {night:'Saturday', meal:'Grilled Chicken Thighs & Quinoa Tabbouleh', badge:'chicken',
-  recipe:{time:'20 min prep + 15 min grill', serves:4, cost:'~$15', gf:true,
-   ingredients:[{name:'Bone-in chicken thighs',qty:'4–6',cat:'protein'},{name:'Quinoa',qty:'1.5 cups dry',cat:'pantry'},{name:'Cucumber',qty:'1 large',cat:'produce'},{name:'Fresh parsley',qty:'1 bunch',cat:'produce'},{name:'Fresh mint',qty:'handful',cat:'produce'},{name:'Olive oil',qty:'3 tbsp',cat:'pantry'},{name:'Lemon zest',qty:'from 1 lemon',cat:'produce'},{name:'Salt & pepper',qty:'to taste',cat:'spices'}],
-   steps:['Cook quinoa: 1 part quinoa to 2 parts water, bring to boil, reduce heat, cover, simmer 15 min. Fluff with fork.','Season chicken with olive oil, salt, pepper. Grill over medium-high 6–7 min per side.','Dice cucumber finely. Chop parsley and mint.','Make tabbouleh: toss cooled quinoa with cucumber, herbs, olive oil, lemon zest, salt.','Serve grilled chicken alongside quinoa tabbouleh.'],
-   note:'Traditional tabbouleh uses bulgur — subbing quinoa makes it GF and adds protein.',
-   gfNote:'Quinoa is naturally GF. Rinse well before cooking to remove saponins.'}},
+{season:'Spring',protein:'Chicken',themeId:'classic',days:[
+ {n:'Sunday', m:'🧊 Instant Pot Chicken Burrito Bowls',b:'chicken',batch:true,
+  r:{t:'15 min + 20 min IP',sv:6,cost:'~$16',gf:true,
+   i:[{n:'Bone-in chicken thighs',q:'6–8',c:'protein'},{n:'Jasmine rice',q:'2 cups dry',c:'pantry'},{n:'Black beans (2 cans)',q:'30 oz',c:'canned'},{n:'Frozen corn',q:'1 cup',c:'frozen'},{n:'GF chicken broth',q:'1 cup',c:'canned'},{n:'Mild salsa verde',q:'½ cup',c:'canned'},{n:'Cumin',q:'1 tsp',c:'spices'},{n:'Garlic powder',q:'1 tsp',c:'spices'},{n:'Shredded cheese',q:'1 cup',c:'dairy'},{n:'Sour cream',q:'½ cup',c:'dairy'},{n:'Avocado',q:'2',c:'produce'}],
+   s:['Season chicken with cumin, garlic powder, salt.','Place in IP with broth and salsa verde. HIGH pressure 15 min. Natural release 10 min.','Shred chicken. Cook rice on stovetop.','Warm beans with a pinch of cumin.','Build bowls: rice→chicken→beans→corn→cheese→sour cream→avocado.','🧊 Cook 8 thighs — freeze extra shredded chicken for 2–3 future taco nights.'],
+   note:'Salsa verde is lower acid than tomato salsa — great for reflux.',
+   gfn:'⚠️ Check broth and salsa verde labels. Tomatillo salsa verde is usually naturally GF.'}},
+ {n:'Monday', m:'Burrito Bowls (leftover)',b:'chicken',
+  r:{t:'10 min',sv:4,cost:'~$3',gf:true,
+   i:[{n:'Leftover chicken & rice',q:'4 cups',c:'protein'},{n:'Shredded cheese',q:'½ cup',c:'dairy'},{n:'Corn',q:'½ cup',c:'frozen'},{n:'Avocado',q:'1',c:'produce'}],
+   s:['Reheat chicken and rice.','Top with cheese, corn, and diced avocado.'],
+   gfn:'All GF.'}},
+ {n:'Tuesday', m:'🌮 Taco Tuesday — Shrimp (garlic butter)',b:'fish',anchor:'taco',
+  r:{t:'20 min',sv:4,cost:'~$15',gf:true,
+   i:[{n:'Medium shrimp (peeled)',q:'1.5 lbs',c:'protein'},{n:'Corn tortillas',q:'12',c:'bread'},{n:'Shredded cabbage',q:'2 cups',c:'produce'},{n:'Avocado',q:'2',c:'produce'},{n:'Sour cream',q:'¼ cup',c:'dairy'},{n:'Lemon zest',q:'from 1 lemon',c:'produce'},{n:'Garlic powder',q:'1 tsp',c:'spices'},{n:'Mild paprika',q:'½ tsp',c:'spices'},{n:'Butter',q:'1 tbsp',c:'dairy'},{n:'Pinto beans',q:'1 can',c:'canned'}],
+   s:['Pat shrimp dry. Season with garlic powder, paprika, salt.','Cook in butter over medium-high 1–2 min per side until pink.','Mix sour cream with lemon ZEST (not juice) for crema.','Build tacos: shrimp, cabbage, avocado, lemon crema.'],
+   note:'Lemon zest = bright citrus flavor with far less acid than juice.',
+   gfn:'Shrimp naturally GF. Corn tortillas GF.'}},
+ {n:'Wednesday', m:'Turkey Stuffed Bell Peppers',b:'turkey',
+  r:{t:'20 min + 35 min',sv:4,cost:'~$14',gf:true,
+   i:[{n:'Ground turkey',q:'1 lb',c:'protein'},{n:'Bell peppers (4 large)',q:'4',c:'produce'},{n:'Jasmine rice (cooked)',q:'1 cup',c:'pantry'},{n:'Frozen corn',q:'½ cup',c:'frozen'},{n:'Mild shredded cheese',q:'1 cup',c:'dairy'},{n:'GF chicken broth',q:'¼ cup',c:'canned'},{n:'Cumin',q:'1 tsp',c:'spices'},{n:'Garlic powder',q:'½ tsp',c:'spices'}],
+   s:['Preheat oven to 375°F. Cut tops off peppers, remove seeds.','Brown turkey with cumin, garlic powder, salt.','Mix turkey with rice, corn, broth. Fill peppers. Top with cheese.','Cover with foil. Bake 30 min. Uncover 5 min to melt cheese.'],
+   note:'Broth instead of tomato sauce = reflux-friendly and moist.',
+   gfn:'⚠️ GF certified broth required.'}},
+ {n:'Thursday', m:'🫘 Pea & Mint Risotto',b:'plant',
+  r:{t:'30 min active',sv:4,cost:'~$10',gf:true,
+   i:[{n:'Arborio rice',q:'1.5 cups',c:'pantry'},{n:'Frozen sweet peas',q:'2 cups',c:'frozen'},{n:'GF broth (warm)',q:'5–6 cups',c:'canned'},{n:'Parmesan (grated)',q:'½ cup',c:'dairy'},{n:'Fresh mint',q:'handful',c:'produce'},{n:'Butter',q:'2 tbsp',c:'dairy'},{n:'Onion',q:'1 small',c:'produce'},{n:'Olive oil',q:'1 tbsp',c:'pantry'}],
+   s:['Warm broth in a separate pot — keep hot.','Sauté diced onion in oil + 1 tbsp butter 5 min.','Add arborio, stir 2 min until toasted.','Add warm broth one ladle at a time, stirring and waiting until absorbed. ~20 min total.','Add peas last 3 min.','Remove from heat. Stir in parmesan, butter, chopped mint. Season.'],
+   note:'Arborio rice is naturally GF. A luxurious plant-based dinner.',
+   gfn:'⚠️ Arborio rice is GF. Check broth label.'}},
+ {n:'Friday', m:'🍕 Pizza Friday — Pesto Chicken',b:'chicken',anchor:'pizza',
+  r:{t:'25 min',sv:4,cost:'~$15',gf:true,
+   i:[{n:"TJ's GF frozen pizza crust",q:'2',c:'frozen'},{n:'Basil pesto (GF)',q:'¼ cup',c:'pantry'},{n:'Rotisserie chicken (pulled)',q:'1.5 cups',c:'protein'},{n:'Fresh mozzarella',q:'8 oz',c:'dairy'},{n:'Baby spinach',q:'1 cup',c:'produce'},{n:'Artichoke hearts (canned)',q:'½ cup',c:'canned'}],
+   s:['Preheat oven to 425°F.','Spread pesto over crust.','Layer spinach, torn mozzarella, chicken, drained artichoke.','Bake 12–15 min until cheese melts and edges golden.'],
+   gfn:'⚠️ GF pesto: blend fresh basil + olive oil + parmesan + pine nuts. Kirkland pesto is GF.'}},
+ {n:'Saturday', m:'Grilled Chicken & Quinoa Tabbouleh',b:'chicken',
+  r:{t:'20 min + 15 min grill',sv:4,cost:'~$15',gf:true,
+   i:[{n:'Bone-in chicken thighs',q:'4–6',c:'protein'},{n:'Quinoa',q:'1.5 cups dry',c:'pantry'},{n:'Cucumber',q:'1 large',c:'produce'},{n:'Fresh parsley',q:'1 bunch',c:'produce'},{n:'Fresh mint',q:'handful',c:'produce'},{n:'Olive oil',q:'3 tbsp',c:'pantry'},{n:'Lemon zest',q:'from 1 lemon',c:'produce'}],
+   s:['Cook quinoa: 1.5 cups + 3 cups water. Boil, cover, simmer 15 min. Cool.','Season chicken with olive oil, salt, pepper. Grill 6–7 min per side to 165°F.','Dice cucumber. Chop parsley and mint.','Mix cooled quinoa with cucumber, herbs, olive oil, lemon zest, salt.','Serve grilled chicken alongside tabbouleh.'],
+   note:'Quinoa subs for bulgur — GF and more protein.',
+   gfn:'Quinoa is naturally GF. Rinse before cooking.'}},
 ]},
-{season:'Summer', protein:'Chicken', days:[
- {night:'Sunday', meal:'🧊 Grilled Chicken Batch + Corn', badge:'chicken', batch:true,
-  recipe:{time:'20 min prep + 20 min grill', serves:'8+ (batch)', cost:'~$17', gf:true,
-   ingredients:[{name:'Bone-in chicken thighs',qty:'8–10',cat:'protein'},{name:'Corn on the cob',qty:'4',cat:'produce'},{name:'Quinoa',qty:'2 cups dry',cat:'pantry'},{name:'Cucumber',qty:'1',cat:'produce'},{name:'Olive oil',qty:'3 tbsp',cat:'pantry'},{name:'Garlic powder',qty:'1 tsp',cat:'spices'},{name:'Smoked paprika',qty:'1 tsp',cat:'spices'},{name:'Salt',qty:'to taste',cat:'spices'}],
-   steps:['Season all chicken with olive oil, garlic powder, paprika, salt.','Grill over medium-high heat 6–7 min per side until 165°F.','Grill corn in husk 15 min turning occasionally, or shuck and grill direct 8 min.','Cook quinoa. Mix cooled quinoa with diced cucumber, olive oil, salt for quinoa salad.','Slice 4 thighs for dinner. Refrigerate rest for Mon taco bowls and Wed salads.','🧊 This batch proteins up 3–4 dinners this week — maximum efficiency.'],
-   gfNote:'All naturally GF. Check spice blend labels.'}},
- {night:'Monday', meal:'Grilled Chicken & Corn Quinoa Bowl', badge:'chicken',
-  recipe:{time:'10 min', serves:4, cost:'~$4', gf:true,
-   ingredients:[{name:'Leftover grilled chicken',qty:'2 cups',cat:'protein'},{name:'Leftover quinoa',qty:'2 cups',cat:'pantry'},{name:'Corn (cut from cob)',qty:'2 ears',cat:'produce'},{name:'Olive oil',qty:'1 tbsp',cat:'pantry'}],
-   steps:['Slice or shred leftover chicken.','Reheat quinoa.','Combine chicken, quinoa, corn. Drizzle with olive oil, season with salt.'],
-   gfNote:'All GF.'}},
- {night:'Tuesday', meal:'🌮 Taco Tuesday — Grilled Chicken (from Sunday)', badge:'chicken', anchor:'taco',
-  recipe:{time:'15 min', serves:4, cost:'~$10', gf:true,
-   ingredients:[{name:'Leftover grilled chicken',qty:'2 cups',cat:'protein'},{name:'Corn tortillas',qty:'12',cat:'bread'},{name:'Avocado',qty:'2',cat:'produce'},{name:'Mild salsa verde',qty:'½ cup',cat:'canned'},{name:'Shredded cabbage',qty:'2 cups',cat:'produce'},{name:'Black beans',qty:'1 can',cat:'canned'}],
-   steps:['Slice or shred leftover grilled chicken. Reheat in skillet with a splash of water.','Warm tortillas.','Warm black beans with cumin.','Assemble tacos with chicken, cabbage, avocado, and salsa verde.'],
-   gfNote:'All GF. Leftover chicken is already seasoned.'}},
- {night:'Wednesday', meal:'Turkey Zucchini Boats', badge:'turkey',
-  recipe:{time:'15 min prep + 30 min bake', serves:4, cost:'~$13', gf:true,
-   ingredients:[{name:'Zucchini (large)',qty:'4',cat:'produce'},{name:'Ground turkey',qty:'1 lb',cat:'protein'},{name:'Black beans',qty:'½ can',cat:'canned'},{name:'Frozen corn',qty:'½ cup',cat:'frozen'},{name:'Mild shredded cheese',qty:'1 cup',cat:'dairy'},{name:'GF broth',qty:'¼ cup',cat:'canned'},{name:'Cumin, garlic powder',qty:'1 tsp each',cat:'spices'}],
-   steps:['Preheat oven to 400°F.','Halve zucchini lengthwise, scoop out centers.','Brown turkey with spices. Mix in beans, corn, broth. Simmer 3 min.','Fill zucchini boats with turkey mixture. Top with cheese.','Bake 25–30 min until zucchini is tender and cheese is bubbly.'],
-   gfNote:'All GF. Skip tomato sauce — broth keeps it moist and reflux-friendly.'}},
- {night:'Thursday', meal:'🫘 Cold Sesame Noodle Bowls', badge:'plant',
-  recipe:{time:'20 min', serves:4, cost:'~$10', gf:true,
-   ingredients:[{name:'GF rice noodles (Annie Chun\'s)',qty:'8 oz',cat:'pantry'},{name:'Shelled edamame (frozen)',qty:'2 cups',cat:'frozen'},{name:'Shredded carrots',qty:'1 cup',cat:'produce'},{name:'Cucumber',qty:'1',cat:'produce'},{name:'Tamari (GF)',qty:'3 tbsp',cat:'pantry'},{name:'Sesame oil',qty:'1 tbsp',cat:'pantry'},{name:'Natural peanut butter',qty:'2 tbsp',cat:'pantry'},{name:'Honey',qty:'1 tsp',cat:'pantry'},{name:'Garlic powder',qty:'½ tsp',cat:'spices'},{name:'Sesame seeds',qty:'1 tbsp',cat:'spices'}],
-   steps:['Cook rice noodles per package. Rinse under cold water to stop cooking. Drain.','Thaw edamame. Shred carrots, slice cucumber.','Make sauce: whisk tamari, sesame oil, peanut butter, honey, garlic powder, and 2 tbsp warm water until smooth.','Toss noodles with sauce. Top with edamame, carrots, cucumber, sesame seeds.','Serve cold or room temp — perfect summer meal.'],
-   gfNote:'⚠️ Tamari not soy sauce. Check rice noodles for GF (Annie Chun\'s and Thai Kitchen are GF). Check peanut butter for cross-contamination (Jif and Skippy are GF).'}},
- {night:'Friday', meal:'🍕 Pizza Friday — Summer Veggie (pesto)', badge:'mixed', anchor:'pizza',
-  recipe:{time:'25 min', serves:4, cost:'~$13', gf:true,
-   ingredients:[{name:'TJ\'s GF frozen pizza crust',qty:'2',cat:'frozen'},{name:'Basil pesto (GF)',qty:'¼ cup',cat:'pantry'},{name:'Fresh mozzarella',qty:'8 oz',cat:'dairy'},{name:'Zucchini',qty:'1',cat:'produce'},{name:'Frozen corn',qty:'½ cup',cat:'frozen'}],
-   steps:['Preheat oven to 425°F.','Thinly slice zucchini. Thaw corn.','Spread pesto over crust. Top with mozzarella, zucchini slices, corn.','Bake 12–15 min.'],
-   gfNote:'⚠️ Make or verify GF pesto. TJ\'s GF crust is certified GF.'}},
- {night:'Saturday', meal:'Grilled Salmon & Summer Salad', badge:'fish',
-  recipe:{time:'20 min', serves:4, cost:'~$19', gf:true,
-   ingredients:[{name:'Salmon fillets',qty:'4 (6 oz each)',cat:'protein'},{name:'Quinoa',qty:'1.5 cups dry',cat:'pantry'},{name:'Arugula',qty:'4 cups',cat:'produce'},{name:'Cucumber',qty:'1',cat:'produce'},{name:'Olive oil',qty:'3 tbsp',cat:'pantry'},{name:'Lemon zest',qty:'from 1 lemon',cat:'produce'},{name:'Salt & pepper',qty:'to taste',cat:'spices'}],
-   steps:['Cook quinoa.','Brush salmon with olive oil, salt, pepper. Grill or bake at 400°F, 4 min per side (grill) or 12–14 min (bake).','Make dressing: olive oil, lemon zest, salt, pepper.','Toss arugula and sliced cucumber with dressing.','Serve salmon over quinoa alongside arugula salad.'],
-   gfNote:'All naturally GF. Use lemon zest not juice for reflux.'}},
+{season:'Summer',protein:'Chicken',themeId:'classic',days:[
+ {n:'Sunday', m:'🧊 Grill Batch — Chicken + Corn',b:'chicken',batch:true,
+  r:{t:'20 min + 20 min grill',sv:'8+ (batch)',cost:'~$17',gf:true,
+   i:[{n:'Bone-in chicken thighs',q:'8–10',c:'protein'},{n:'Corn on the cob',q:'4',c:'produce'},{n:'Quinoa',q:'2 cups dry',c:'pantry'},{n:'Cucumber',q:'1 large',c:'produce'},{n:'Olive oil',q:'3 tbsp',c:'pantry'},{n:'Garlic powder',q:'1 tsp',c:'spices'},{n:'Smoked paprika',q:'1 tsp',c:'spices'}],
+   s:['Season all chicken with oil, garlic powder, paprika, salt.','Grill medium-high 6–7 min per side to 165°F. Rest.','Grill corn in husk 15 min turning, or shuck and grill direct 8 min.','Cook quinoa. Mix cooled quinoa with diced cucumber and olive oil.','Slice 4 thighs for tonight. Refrigerate rest for Mon & Tue.','🧊 One grill session fuels 3 dinners — maximum efficiency.'],
+   gfn:'All naturally GF.'}},
+ {n:'Monday', m:'Grilled Chicken & Corn Bowl',b:'chicken',
+  r:{t:'10 min',sv:4,cost:'~$4',gf:true,
+   i:[{n:'Leftover grilled chicken',q:'2 cups',c:'protein'},{n:'Quinoa (cooked)',q:'2 cups',c:'pantry'},{n:'Corn (cut from cob)',q:'2 ears',c:'produce'},{n:'Olive oil',q:'1 tbsp',c:'pantry'}],
+   s:['Slice or shred cold grilled chicken.','Combine with quinoa and corn. Drizzle with olive oil, salt.'],
+   gfn:'All GF.'}},
+ {n:'Tuesday', m:'🌮 Taco Tuesday — Grilled Chicken (batch)',b:'chicken',anchor:'taco',
+  r:{t:'15 min',sv:4,cost:'~$10',gf:true,
+   i:[{n:'Leftover grilled chicken',q:'2 cups',c:'protein'},{n:'Corn tortillas',q:'12',c:'bread'},{n:'Avocado',q:'2',c:'produce'},{n:'Mild salsa verde',q:'½ cup',c:'canned'},{n:'Shredded cabbage',q:'2 cups',c:'produce'},{n:'Black beans',q:'1 can',c:'canned'}],
+   s:['Reheat sliced grilled chicken in skillet with a splash of water.','Warm corn tortillas. Warm black beans with cumin.','Build tacos: chicken, cabbage, avocado, salsa verde.'],
+   note:'Zero extra cooking — chicken was already made Sunday.',
+   gfn:'All GF.'}},
+ {n:'Wednesday', m:'Turkey Zucchini Boats',b:'turkey',
+  r:{t:'15 min + 30 min',sv:4,cost:'~$13',gf:true,
+   i:[{n:'Zucchini (large)',q:'4',c:'produce'},{n:'Ground turkey',q:'1 lb',c:'protein'},{n:'Black beans',q:'½ can',c:'canned'},{n:'Frozen corn',q:'½ cup',c:'frozen'},{n:'Mild shredded cheese',q:'1 cup',c:'dairy'},{n:'GF chicken broth',q:'¼ cup',c:'canned'},{n:'Cumin',q:'1 tsp',c:'spices'},{n:'Garlic powder',q:'1 tsp',c:'spices'}],
+   s:['Preheat oven to 400°F. Halve zucchini lengthwise, scoop centers.','Brown turkey with spices. Mix in beans, corn, broth. Simmer 3 min.','Fill zucchini boats. Top with cheese.','Bake 25–30 min until tender and cheese bubbly.'],
+   gfn:'All GF. Skip jarred tomato sauce.'}},
+ {n:'Thursday', m:'🫘 Cold Sesame Noodle Bowls',b:'plant',
+  r:{t:'20 min',sv:4,cost:'~$10',gf:true,
+   i:[{n:"GF rice noodles (Annie Chun's)",q:'8 oz',c:'pantry'},{n:'Shelled edamame',q:'2 cups',c:'frozen'},{n:'Shredded carrots',q:'1 cup',c:'produce'},{n:'Cucumber',q:'1 medium',c:'produce'},{n:'Tamari (San-J GF)',q:'3 tbsp',c:'pantry'},{n:'Sesame oil',q:'1 tbsp',c:'pantry'},{n:'Natural peanut butter',q:'2 tbsp',c:'pantry'},{n:'Honey',q:'1 tsp',c:'pantry'},{n:'Sesame seeds',q:'1 tbsp',c:'spices'}],
+   s:['Cook rice noodles per package. Rinse cold immediately. Drain.','Thaw edamame. Shred carrots. Slice cucumber.','Sauce: whisk tamari + sesame oil + peanut butter + honey + 2 tbsp warm water.','Toss noodles with sauce. Top with edamame, carrots, cucumber, sesame seeds.'],
+   gfn:'⚠️ Tamari only. Annie Chun\'s rice noodles are GF. Check peanut butter (Jif and Skippy are GF).'}},
+ {n:'Friday', m:'🍕 Pizza Friday — Summer Pesto Veggie',b:'mixed',anchor:'pizza',
+  r:{t:'25 min',sv:4,cost:'~$13',gf:true,
+   i:[{n:"TJ's GF frozen pizza crust",q:'2',c:'frozen'},{n:'Basil pesto (GF)',q:'¼ cup',c:'pantry'},{n:'Fresh mozzarella',q:'8 oz',c:'dairy'},{n:'Zucchini (thin sliced)',q:'1 medium',c:'produce'},{n:'Frozen corn (thawed)',q:'½ cup',c:'frozen'}],
+   s:['Preheat oven to 425°F.','Spread pesto. Top with torn mozzarella, zucchini, corn.','Bake 12–15 min.'],
+   gfn:'⚠️ Verify pesto is GF. TJ\'s GF crust is certified GF.'}},
+ {n:'Saturday', m:'Grilled Salmon & Summer Salad',b:'fish',
+  r:{t:'20 min',sv:4,cost:'~$19',gf:true,
+   i:[{n:'Salmon fillets',q:'4 (6 oz each)',c:'protein'},{n:'Quinoa',q:'1.5 cups dry',c:'pantry'},{n:'Arugula',q:'4 cups',c:'produce'},{n:'Cucumber',q:'1 medium',c:'produce'},{n:'Olive oil',q:'3 tbsp',c:'pantry'},{n:'Lemon zest',q:'from 1 lemon',c:'produce'}],
+   s:['Cook quinoa. Cool slightly.','Brush salmon with oil, salt, pepper. Grill 4 min per side (or bake 400°F 12 min).','Toss arugula and sliced cucumber with olive oil, lemon zest, salt.','Serve salmon over quinoa with salad alongside.'],
+   gfn:'All naturally GF. Lemon zest instead of juice for reflux.'}},
 ]},
 ];
 
-// ══════════════════════════════════════════════════════════════════
-// APP STATE
-// ══════════════════════════════════════════════════════════════════
-let currentWeek = 0; // 0-indexed
-let calMonth = new Date().getMonth();
-let calYear = new Date().getFullYear();
-let checkedIngredients = JSON.parse(localStorage.getItem('checkedIngredients') || '{}');
-let settings = JSON.parse(localStorage.getItem('mealPlanSettings') || '{}');
-settings.zip = settings.zip || '97201';
-settings.startDate = settings.startDate || '2025-01-05';
-settings.familySize = settings.familySize || 4;
+// ════════════════════════════════════════════════════════════════
+// THEME-SPECIFIC WEEK OVERRIDES
+// Each themed week replaces the non-anchor nights with theme-specific meals
+// Taco Tuesday & Pizza Friday always stay (toppings adapt to theme)
+// ════════════════════════════════════════════════════════════════
+const THEMED_WEEKS = {
+mexican: {
+ season:'Any', protein:'Turkey', themeId:'mexican',
+ days:[
+  {n:'Sunday',  m:'🧊 Slow Cooker Chicken Posole Verde',b:'chicken',batch:true,
+   r:{t:'15 min + 7 hr slow',sv:8,cost:'~$18',gf:true,
+    i:[{n:'Chicken thighs',q:'3 lbs',c:'protein'},{n:'Hominy (canned)',q:'2 cans',c:'canned'},{n:'Salsa verde',q:'1.5 cups',c:'canned'},{n:'GF chicken broth',q:'3 cups',c:'canned'},{n:'Cumin',q:'1 tsp',c:'spices'},{n:'Garlic',q:'4 cloves',c:'produce'},{n:'Cabbage (shredded)',q:'2 cups',c:'produce'},{n:'Avocado',q:'2',c:'produce'},{n:'Corn tortillas',q:'8',c:'bread'}],
+    s:['Place chicken, broth, salsa verde, cumin, minced garlic in slow cooker.','Cook LOW 6–8 hrs. Shred chicken. Stir in hominy. Cook 30 more min.','Serve topped with shredded cabbage, avocado, warm corn tortillas on the side.','🧊 Freeze half — posole gets better the next day.'],
+    gfn:'Hominy is GF (it\'s nixtamalized corn). Salsa verde check label.'}},
+  {n:'Monday',  m:'Posole Bowls (leftover)',b:'chicken',
+   r:{t:'10 min',sv:4,cost:'~$3',gf:true,
+    i:[{n:'Leftover posole',q:'4 cups',c:'protein'},{n:'Avocado',q:'1',c:'produce'},{n:'Cabbage',q:'1 cup',c:'produce'}],
+    s:['Reheat posole. Top with fresh cabbage and avocado.'],
+    gfn:'All GF.'}},
+  {n:'Tuesday', m:'🌮 Taco Tuesday — Chicken Al Pastor',b:'chicken',anchor:'taco',
+   r:{t:'25 min',sv:4,cost:'~$13',gf:true,
+    i:[{n:'Chicken thighs',q:'1.5 lbs',c:'protein'},{n:'Corn tortillas',q:'12',c:'bread'},{n:'Pineapple chunks',q:'1 cup',c:'produce'},{n:'Avocado',q:'2',c:'produce'},{n:'Mild achiote paste (GF)',q:'2 tbsp',c:'spices'},{n:'Pinto beans',q:'1 can',c:'canned'},{n:'Cumin',q:'1 tsp',c:'spices'},{n:'Garlic powder',q:'½ tsp',c:'spices'}],
+    s:['Mix achiote paste with oil, cumin, garlic powder. Coat chicken.','Grill or pan-cook chicken 6–7 min per side. Slice.','Warm tortillas. Build tacos: chicken, pineapple, avocado.'],
+    gfn:'⚠️ Check achiote paste label for GF.'}},
+  {n:'Wednesday', m:'Chicken & Sweet Potato Enchilada Casserole',b:'chicken',
+   r:{t:'25 min + 30 min bake',sv:6,cost:'~$15',gf:true,
+    i:[{n:'Shredded chicken',q:'2 cups',c:'protein'},{n:'Corn tortillas (cut in pieces)',q:'8',c:'bread'},{n:'Sweet potato (cubed, roasted)',q:'2 cups',c:'produce'},{n:'Mild green enchilada sauce (GF)',q:'1 can',c:'canned'},{n:'Shredded cheese',q:'2 cups',c:'dairy'},{n:'Black beans',q:'1 can',c:'canned'}],
+    s:['Preheat oven to 375°F. Layer corn tortilla pieces on bottom of 9x13 dish.','Layer chicken, beans, sweet potato, half the cheese.','Pour enchilada sauce over top. Add remaining cheese.','Bake 30 min until bubbly.'],
+    note:'Green sauce is lower acid than red — better for reflux.',
+    gfn:'⚠️ Old El Paso mild green enchilada sauce is GF. Check label.'}},
+  {n:'Thursday', m:'🫘 Black Bean & Corn Tostadas',b:'plant',
+   r:{t:'20 min',sv:4,cost:'~$9',gf:true,
+    i:[{n:'Corn tostadas (GF)',q:'8',c:'bread'},{n:'Black beans',q:'2 cans',c:'canned'},{n:'Frozen corn',q:'1 cup',c:'frozen'},{n:'Avocado',q:'2',c:'produce'},{n:'Shredded cheese',q:'1 cup',c:'dairy'},{n:'Sour cream',q:'¼ cup',c:'dairy'},{n:'Cumin',q:'1 tsp',c:'spices'}],
+    s:['Warm beans with cumin. Mash slightly.','Spread beans on tostadas. Top with corn, cheese, sour cream, avocado.'],
+    gfn:'Corn tostadas are naturally GF. Check any seasoning.'}},
+  {n:'Friday', m:'🍕 Pizza Friday — Mexican Pizza',b:'chicken',anchor:'pizza',
+   r:{t:'25 min',sv:4,cost:'~$14',gf:true,
+    i:[{n:"TJ's GF frozen pizza crust",q:'2',c:'frozen'},{n:'Shredded chicken',q:'1.5 cups',c:'protein'},{n:'Mild green enchilada sauce',q:'¼ cup',c:'canned'},{n:'Shredded Mexican cheese blend',q:'2 cups',c:'dairy'},{n:'Frozen corn',q:'½ cup',c:'frozen'},{n:'Black beans',q:'½ can',c:'canned'},{n:'Avocado (after baking)',q:'1',c:'produce'}],
+    s:['Preheat 425°F. Spread enchilada sauce on crust.','Top with cheese, chicken, corn, beans.','Bake 12–15 min. Finish with sliced avocado.'],
+    gfn:'⚠️ GF enchilada sauce. TJ\'s crust is GF.'}},
+  {n:'Saturday', m:'Birria-Style Turkey Stew & Rice',b:'turkey',
+   r:{t:'20 min + 2 hr slow',sv:6,cost:'~$16',gf:true,
+    i:[{n:'Ground turkey',q:'2 lbs',c:'protein'},{n:'GF beef-style broth',q:'3 cups',c:'canned'},{n:'Mild dried chiles (guajillo)',q:'2',c:'spices'},{n:'Garlic',q:'4 cloves',c:'produce'},{n:'Cumin',q:'1 tsp',c:'spices'},{n:'Oregano',q:'½ tsp',c:'spices'},{n:'Jasmine rice',q:'2 cups dry',c:'pantry'},{n:'Corn tortillas',q:'8',c:'bread'}],
+    s:['Bloom dried chiles in hot water 10 min. Blend with garlic and broth.','Brown turkey in a pot. Add chile broth, cumin, oregano.','Simmer 1.5–2 hrs low until rich and thick.','Serve over rice with warm corn tortillas for dipping.'],
+    gfn:'⚠️ Dried chiles are naturally GF. Check broth label.'}},
+ ]},
+greek: {
+ season:'Any', protein:'Chicken', themeId:'greek',
+ days:[
+  {n:'Sunday',  m:'🧊 Slow Cooker Greek Chicken',b:'chicken',batch:true,
+   r:{t:'15 min + 6 hr slow',sv:8,cost:'~$18',gf:true,
+    i:[{n:'Bone-in chicken thighs',q:'4 lbs',c:'protein'},{n:'Olive oil',q:'3 tbsp',c:'pantry'},{n:'Garlic',q:'5 cloves',c:'produce'},{n:'Lemon zest',q:'from 2 lemons',c:'produce'},{n:'Dried oregano',q:'2 tsp',c:'spices'},{n:'Dried thyme',q:'1 tsp',c:'spices'},{n:'GF chicken broth',q:'½ cup',c:'canned'}],
+    s:['Mix olive oil, minced garlic, lemon zest, oregano, thyme, salt, pepper.','Coat chicken in herb mixture. Place in slow cooker with broth.','Cook LOW 6–8 hrs until tender and falling off bone.','Shred or serve whole. Save cooking juices as sauce.','🧊 Cook double — freeze half shredded for bowls later.'],
+    note:'Lemon zest not juice — bright flavor, low acid for reflux.',
+    gfn:'All naturally GF.'}},
+  {n:'Monday',  m:'Greek Chicken Bowls',b:'chicken',
+   r:{t:'15 min',sv:4,cost:'~$4',gf:true,
+    i:[{n:'Leftover Greek chicken',q:'2 cups',c:'protein'},{n:'Quinoa',q:'2 cups cooked',c:'pantry'},{n:'Cucumber',q:'1',c:'produce'},{n:'Kalamata olives',q:'¼ cup',c:'canned'},{n:'Feta cheese',q:'¼ cup',c:'dairy'},{n:'Olive oil',q:'1 tbsp',c:'pantry'}],
+    s:['Reheat chicken. Dice cucumber.','Build bowls: quinoa, chicken, cucumber, olives, feta, olive oil drizzle.'],
+    gfn:'All naturally GF.'}},
+  {n:'Tuesday', m:'🌮 Taco Tuesday — Greek Chicken Gyro-Taco',b:'chicken',anchor:'taco',
+   r:{t:'20 min',sv:4,cost:'~$12',gf:true,
+    i:[{n:'Leftover Greek chicken',q:'2 cups',c:'protein'},{n:'Corn tortillas',q:'12',c:'bread'},{n:'Plain Greek yogurt',q:'½ cup',c:'dairy'},{n:'Cucumber (diced)',q:'½',c:'produce'},{n:'Garlic powder',q:'¼ tsp',c:'spices'},{n:'Fresh dill',q:'1 tbsp',c:'produce'},{n:'Pinto beans',q:'1 can',c:'canned'}],
+    s:['Make tzatziki: mix yogurt, diced cucumber, garlic powder, dill, salt.','Reheat chicken.','Build corn tortilla "gyro tacos" with chicken and tzatziki.'],
+    gfn:'Corn tortillas GF. Greek yogurt GF.'}},
+  {n:'Wednesday', m:'Lemon-Herb Baked Chicken & Roasted Veg',b:'chicken',
+   r:{t:'15 min + 35 min',sv:4,cost:'~$14',gf:true,
+    i:[{n:'Chicken breast',q:'4',c:'protein'},{n:'Zucchini',q:'2',c:'produce'},{n:'Cherry tomatoes (small amount)',q:'½ cup',c:'produce'},{n:'Kalamata olives',q:'¼ cup',c:'canned'},{n:'Olive oil',q:'3 tbsp',c:'pantry'},{n:'Dried oregano',q:'1 tsp',c:'spices'},{n:'Lemon zest',q:'from 1 lemon',c:'produce'}],
+    s:['Preheat oven to 400°F.','Arrange chicken and veg on sheet pan. Drizzle with olive oil.','Sprinkle oregano, lemon zest, salt, pepper.','Roast 30–35 min until chicken reaches 165°F.'],
+    gfn:'All naturally GF.'}},
+  {n:'Thursday', m:'🫘 Greek Lemon Rice & Chickpea Soup',b:'plant',
+   r:{t:'10 min + 30 min',sv:6,cost:'~$10',gf:true,
+    i:[{n:'Chickpeas (2 cans)',q:'30 oz',c:'canned'},{n:'Jasmine rice',q:'1 cup dry',c:'pantry'},{n:'GF chicken broth',q:'6 cups',c:'canned'},{n:'Spinach',q:'2 cups',c:'produce'},{n:'Garlic',q:'3 cloves',c:'produce'},{n:'Lemon zest',q:'from 1 lemon',c:'produce'},{n:'Olive oil',q:'2 tbsp',c:'pantry'},{n:'Oregano',q:'1 tsp',c:'spices'}],
+    s:['Sauté garlic in olive oil 1 min.','Add broth, chickpeas, rice. Bring to boil, simmer 18 min.','Stir in spinach and lemon zest. Season with oregano, salt, pepper.'],
+    gfn:'⚠️ GF broth. Chickpeas GF. Rice GF.'}},
+  {n:'Friday', m:'🍕 Pizza Friday — Greek White Pizza',b:'chicken',anchor:'pizza',
+   r:{t:'25 min',sv:4,cost:'~$15',gf:true,
+    i:[{n:"TJ's GF frozen pizza crust",q:'2',c:'frozen'},{n:'Olive oil',q:'2 tbsp',c:'pantry'},{n:'Garlic',q:'2 cloves',c:'produce'},{n:'Chicken (sliced)',q:'1.5 cups',c:'protein'},{n:'Feta cheese',q:'½ cup',c:'dairy'},{n:'Mozzarella',q:'1.5 cups',c:'dairy'},{n:'Baby spinach',q:'1 cup',c:'produce'},{n:'Kalamata olives',q:'¼ cup',c:'canned'}],
+    s:['Preheat 425°F. Brush crust with garlic olive oil.','Top with mozzarella, chicken, feta, spinach, olives.','Bake 12–15 min.'],
+    note:'White base (olive oil) is reflux-friendly — no tomato sauce needed.',
+    gfn:'All GF.'}},
+  {n:'Saturday', m:'Lamb Kofta-Style Turkey Skewers & Tzatziki',b:'turkey',
+   r:{t:'25 min + 15 min grill',sv:4,cost:'~$15',gf:true,
+    i:[{n:'Ground turkey',q:'1.5 lbs',c:'protein'},{n:'Fresh parsley (chopped)',q:'¼ cup',c:'produce'},{n:'Cumin',q:'1 tsp',c:'spices'},{n:'Coriander',q:'½ tsp',c:'spices'},{n:'Garlic powder',q:'½ tsp',c:'spices'},{n:'Plain Greek yogurt',q:'½ cup',c:'dairy'},{n:'Cucumber',q:'½',c:'produce'},{n:'Quinoa',q:'1.5 cups dry',c:'pantry'}],
+    s:['Mix turkey with parsley, cumin, coriander, garlic powder, salt.','Form into oval patties or skewer into logs.','Grill or air fry at 400°F 12–15 min, flipping halfway.','Make tzatziki: yogurt + diced cucumber + garlic powder + dill + salt.','Serve over quinoa with tzatziki on the side.'],
+    gfn:'All naturally GF.'}},
+ ]},
+italian: {
+ season:'Any', protein:'Turkey', themeId:'italian',
+ days:[
+  {n:'Sunday',  m:'🧊 Slow Cooker Turkey Meatball Sugo',b:'turkey',batch:true,
+   r:{t:'30 min + 4 hr slow',sv:8,cost:'~$18',gf:true,
+    i:[{n:'Ground turkey',q:'2 lbs',c:'protein'},{n:'GF breadcrumbs (Schär)',q:'½ cup',c:'bread'},{n:'Egg',q:'1',c:'dairy'},{n:'Garlic powder',q:'1 tsp',c:'spices'},{n:'Italian seasoning',q:'1 tsp',c:'spices'},{n:'Parmesan (grated)',q:'¼ cup',c:'dairy'},{n:'Olive oil base sauce (not heavy tomato)',q:'2 cups',c:'canned'},{n:'GF pasta (Barilla)',q:'1 lb',c:'pantry'}],
+    s:['Mix turkey, GF breadcrumbs, egg, garlic powder, Italian seasoning, parmesan, salt.','Roll into 1.5" meatballs (~48). Freeze half raw for future weeks.','Brown remaining meatballs in skillet 3 min per side.','Transfer to slow cooker with olive oil–based sauce. Cook LOW 4 hrs.','Serve over cooked GF pasta.','🧊 Freeze half the raw meatballs on a sheet pan then bag.'],
+    gfn:'⚠️ GF breadcrumbs (Schär). Barilla GF pasta. Check sauce label.'}},
+  {n:'Monday',  m:'Meatball Pasta (leftover)',b:'turkey',
+   r:{t:'10 min',sv:4,cost:'~$3',gf:true,
+    i:[{n:'Leftover meatballs & sauce',q:'12 meatballs',c:'protein'},{n:'GF pasta (cooked)',q:'4 cups',c:'pantry'},{n:'Parmesan',q:'¼ cup',c:'dairy'}],
+    s:['Reheat meatballs and sauce. Toss with cooked GF pasta.','Top with parmesan.'],
+    gfn:'⚠️ GF pasta required.'}},
+  {n:'Tuesday', m:'🌮 Taco Tuesday — Italian Turkey Meatball',b:'turkey',anchor:'taco',
+   r:{t:'20 min',sv:4,cost:'~$12',gf:true,
+    i:[{n:'GF turkey meatballs (from batch)',q:'12',c:'protein'},{n:'Corn tortillas',q:'12',c:'bread'},{n:'Ricotta cheese',q:'½ cup',c:'dairy'},{n:'Baby spinach',q:'1 cup',c:'produce'},{n:'Parmesan',q:'¼ cup',c:'dairy'},{n:'Pinto beans',q:'1 can',c:'canned'}],
+    s:['Slice meatballs in half. Reheat in a skillet.','Warm corn tortillas.','Build "Italian tacos": meatball, smear of ricotta, spinach, parmesan.','Fun cross-cultural flavor — kids love it.'],
+    note:'Corn tortilla Italian tacos — a surprising crowd pleaser.',
+    gfn:'All GF. Corn tortillas GF.'}},
+  {n:'Wednesday', m:'Chicken Piccata (GF) & Roasted Asparagus',b:'chicken',
+   r:{t:'20 min',sv:4,cost:'~$16',gf:true,
+    i:[{n:'Chicken breast (thin sliced)',q:'4',c:'protein'},{n:'GF all-purpose flour (Bob\'s 1-to-1)',q:'¼ cup',c:'pantry'},{n:'Butter',q:'3 tbsp',c:'dairy'},{n:'GF chicken broth',q:'½ cup',c:'canned'},{n:'Capers',q:'2 tbsp',c:'canned'},{n:'Lemon zest',q:'from 1 lemon',c:'produce'},{n:'Asparagus',q:'1 bunch',c:'produce'},{n:'Olive oil',q:'2 tbsp',c:'pantry'}],
+    s:['Pound chicken thin. Dredge in GF flour, salt, pepper.','Cook in butter in hot skillet 3–4 min per side. Set aside.','Add broth, capers, lemon zest to pan. Scrape up bits. Simmer 3 min.','Return chicken to pan. Spoon sauce over.','Roast asparagus at 425°F with olive oil 10 min.'],
+    gfn:'⚠️ Bob\'s Red Mill 1-to-1 GF flour. GF broth. All other ingredients naturally GF.'}},
+  {n:'Thursday', m:'🫘 White Bean & Herb Minestrone (GF)',b:'plant',
+   r:{t:'15 min + 25 min',sv:6,cost:'~$11',gf:true,
+    i:[{n:'Cannellini beans (2 cans)',q:'30 oz',c:'canned'},{n:'GF pasta (small shape)',q:'1 cup dry',c:'pantry'},{n:'Kale',q:'1 bunch',c:'produce'},{n:'Carrots',q:'3',c:'produce'},{n:'Zucchini',q:'1',c:'produce'},{n:'GF broth',q:'5 cups',c:'canned'},{n:'Olive oil',q:'2 tbsp',c:'pantry'},{n:'Garlic',q:'3 cloves',c:'produce'},{n:'Italian seasoning',q:'1 tsp',c:'spices'}],
+    s:['Sauté garlic in olive oil 1 min. Add carrots and zucchini, cook 4 min.','Add broth, beans, seasoning. Bring to boil.','Add GF pasta, cook per package timing.','Add kale last 4 min.'],
+    gfn:'⚠️ GF pasta (Barilla GF ditalini). GF broth.'}},
+  {n:'Friday', m:'🍕 Pizza Friday — Sausage & Fennel',b:'pork',anchor:'pizza',
+   r:{t:'25 min',sv:4,cost:'~$15',gf:true,
+    i:[{n:"TJ's GF frozen pizza crust",q:'2',c:'frozen'},{n:'GF Italian chicken sausage (Aidells)',q:'2 links',c:'protein'},{n:'Olive oil',q:'2 tbsp',c:'pantry'},{n:'Fennel (thin sliced)',q:'½ bulb',c:'produce'},{n:'Mozzarella',q:'2 cups',c:'dairy'},{n:'Garlic',q:'2 cloves',c:'produce'}],
+    s:['Preheat 425°F. Slice sausage into rounds, brown in skillet.','Brush crust with garlic olive oil. Top with mozzarella, sausage, fennel slices.','Bake 12–15 min.'],
+    note:'Fennel + sausage is a classic Italian combo. No tomato needed.',
+    gfn:'⚠️ Aidells sausage is GF certified.'}},
+  {n:'Saturday', m:'Chicken Marsala (GF) & Roasted Root Veg',b:'chicken',
+   r:{t:'25 min + 25 min veg',sv:4,cost:'~$17',gf:true,
+    i:[{n:'Chicken breast',q:'4',c:'protein'},{n:'GF all-purpose flour',q:'3 tbsp',c:'pantry'},{n:'Marsala wine (or GF broth)',q:'¾ cup',c:'pantry'},{n:'Mushrooms',q:'8 oz',c:'produce'},{n:'Butter',q:'3 tbsp',c:'dairy'},{n:'Sweet potato',q:'2 medium',c:'produce'},{n:'Carrots',q:'2',c:'produce'}],
+    s:['Roast cubed sweet potato and carrots at 425°F 25 min.','Pound chicken flat. Dredge in GF flour with salt, pepper.','Cook in butter 3–4 min per side. Set aside.','Sauté mushrooms 4 min. Add Marsala, simmer until reduced by half.','Return chicken, spoon sauce over. Cook 2 more min.'],
+    gfn:'⚠️ GF flour. Marsala wine is GF. Verify flour and any stock used.'}},
+ ]},
+};
 
-// Detect current week based on start date
-function detectCurrentWeek() {
-  const start = new Date(settings.startDate);
-  const today = new Date();
-  const diffDays = Math.floor((today - start) / (1000*60*60*24));
-  const weekIdx = Math.floor(diffDays / 7) % WEEKS.length;
-  return Math.max(0, weekIdx);
+// ════════════════════════════════════════════════════════════════
+// APP STATE
+// ════════════════════════════════════════════════════════════════
+let currentWeek = 0;
+let calMonth = new Date().getMonth();
+let calYear  = new Date().getFullYear();
+let checked  = JSON.parse(localStorage.getItem('mp_ck') || '{}');
+let weekThemes = JSON.parse(localStorage.getItem('mp_themes') || '{}');
+let settings = JSON.parse(localStorage.getItem('mp_set') || '{"zip":"97201","startDate":"2025-01-05","familySize":4}');
+
+function getWeekData(idx) {
+  const themeId = weekThemes[idx];
+  if (themeId && THEMED_WEEKS[themeId]) {
+    const tw = THEMED_WEEKS[themeId];
+    return {...tw, weekIdx: idx};
+  }
+  return {...BASE_WEEKS[idx % BASE_WEEKS.length], weekIdx: idx};
 }
 
-// ══════════════════════════════════════════════════════════════════
-// NAVIGATION
-// ══════════════════════════════════════════════════════════════════
-function switchView(v) {
-  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
-  document.getElementById('view-'+v).classList.add('active');
-  const tabs = {planner:0, shopping:1, calendar:2, ical:3};
-  document.querySelectorAll('.nav-tab')[tabs[v]].classList.add('active');
-  if(v==='shopping') renderShoppingList();
-  if(v==='calendar') renderCalendar();
-  if(v==='ical') {
-    document.getElementById('ical-week-num').textContent = currentWeek+1;
+function detectCurrentWeek() {
+  const start = new Date(settings.startDate);
+  const diff = Math.floor((new Date() - start) / 86400000);
+  if (diff < 0) return 0;
+  return Math.floor(diff / 7) % 26;
+}
+
+// ════════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ════════════════════════════════════════════════════════════════
+function switchTab(t, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.querySelectorAll('.tb').forEach(b => b.classList.remove('active'));
+  document.getElementById('s-'+t).classList.remove('hidden');
+  btn.classList.add('active');
+  if (t === 'shop') renderShop();
+  if (t === 'cal')  renderCal();
+  if (t === 'more') {
+    document.getElementById('ical-wn').textContent = currentWeek+1;
     const mn = new Date(calYear, calMonth).toLocaleString('default',{month:'long'});
-    document.getElementById('ical-month-name').textContent = mn+' '+calYear;
+    document.getElementById('ical-md').textContent = `Download ${mn} ${calYear} .ics`;
+    document.getElementById('s-zip').value = settings.zip;
+    document.getElementById('s-date').value = settings.startDate;
+    document.getElementById('s-fam').value = settings.familySize;
   }
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 // WEEK RENDERING
-// ══════════════════════════════════════════════════════════════════
-function goToWeek(n) {
-  if(n < 0) n = WEEKS.length-1;
-  if(n >= WEEKS.length) n = 0;
-  currentWeek = n;
-  renderWeek();
-  document.getElementById('shop-week-num').textContent = n+1;
-  document.getElementById('ical-week-num').textContent = n+1;
+// ════════════════════════════════════════════════════════════════
+const TOTAL_WEEKS = 26;
+
+function buildWeekSel() {
+  const sel = document.getElementById('wk-sel');
+  for (let i = 0; i < TOTAL_WEEKS; i++) {
+    const d = getWeekData(i);
+    const thId = weekThemes[i];
+    const thName = thId ? (THEMES.find(t=>t.id===thId)?.name || '') : d.season;
+    const o = document.createElement('option');
+    o.value = i; o.textContent = `Wk ${i+1} — ${thName}`;
+    sel.appendChild(o);
+  }
 }
 
-function renderWeek() {
-  const wk = WEEKS[currentWeek];
-  document.getElementById('week-heading').textContent = 'Week '+(currentWeek+1)+' — '+wk.season;
-  document.getElementById('season-label').textContent = wk.season+' Rotation';
-  document.getElementById('protein-tag').textContent = '🍗 Primary: '+wk.protein;
-  document.getElementById('week-selector').value = currentWeek;
+function goWk(n) {
+  if (n < 0) n = TOTAL_WEEKS-1;
+  if (n >= TOTAL_WEEKS) n = 0;
+  currentWeek = n;
+  renderWeek();
+}
 
-  const grid = document.getElementById('week-grid');
-  grid.innerHTML = '';
+const PROTO_ICONS = {chicken:'🍗',turkey:'🦃',pork:'🐷',beef:'🥩',fish:'🐟',plant:'🫘',mixed:'🍽'};
+const TAG_CLS = {chicken:'tg-c',turkey:'tg-t',pork:'tg-p',fish:'tg-f',plant:'tg-v',beef:'tg-p',mixed:'tg-g'};
+
+function renderWeek() {
+  const wk = getWeekData(currentWeek);
+  const thId = weekThemes[currentWeek];
+  const theme = THEMES.find(t=>t.id===(thId||wk.themeId)) || THEMES[0];
+
+  // Hero card styling
+  const hero = document.getElementById('hero-card');
+  hero.style.background = theme.heroGrad;
+  hero.style.borderColor = theme.heroBorder;
+  hero.style.setProperty('--hero-glow', theme.heroGlow);
+  hero.style.setProperty('--hero-acc', theme.heroAcc);
+  document.documentElement.style.setProperty('--hero-glow', theme.heroGlow);
+
+  document.getElementById('h-emoji').textContent = theme.emoji;
+  document.getElementById('h-wk').textContent = `Week ${currentWeek+1}`;
+  document.getElementById('h-name').textContent = wk.season + ' · ' + theme.name;
+  document.getElementById('h-theme').textContent = theme.desc;
+  document.getElementById('h-protein').textContent = (PROTO_ICONS[wk.protein.toLowerCase()]||'🍗') + ' ' + wk.protein + ' week';
+  document.getElementById('h-protein').style.color = theme.heroAcc;
+  document.getElementById('h-protein').style.background = theme.heroAcc + '22';
+  document.getElementById('h-protein').style.borderColor = theme.heroAcc + '44';
+  document.getElementById('wk-sub').textContent = `Week ${currentWeek+1} · ${theme.name}`;
+  document.getElementById('wk-sel').value = currentWeek;
+
+  const list = document.getElementById('day-list');
+  list.innerHTML = '';
   wk.days.forEach((day, i) => {
-    const isAnchor = day.anchor;
-    const card = document.createElement('div');
-    card.className = 'day-card'+(isAnchor?' anchor':'')+(day.anchor==='taco'?' taco-stripe':day.anchor==='pizza'?' pizza-stripe':'');
-    card.onclick = () => openRecipe(currentWeek, i);
-    const badges = {chicken:'badge-chicken 🍗',turkey:'badge-turkey 🦃',pork:'badge-pork 🐷',beef:'badge-beef 🥩',fish:'badge-fish 🐟',plant:'badge-plant 🫘',mixed:'badge-mixed ✨'};
-    const [badgeClass, badgeIcon] = (badges[day.badge]||'badge-mixed ✨').split(' ');
-    card.innerHTML = `
-      <div class="day-label">${day.night}</div>
-      <div class="day-meal-name">${day.meal}</div>
-      <div class="day-protein-badge ${badgeClass}">${badgeIcon} ${day.badge}</div>
-      ${day.recipe?.gf ? '<div class="day-fiber" style="color:var(--green);font-size:0.72rem">✓ GF</div>' : ''}
-      ${day.batch ? '<div class="day-batch-flag">🧊</div>' : ''}
-    `;
-    grid.appendChild(card);
+    const accentColor = day.anchor==='taco' ? 'var(--ora)' : day.anchor==='pizza' ? 'var(--red)' : 'var(--acc)';
+    const div = document.createElement('div');
+    div.className = 'day-card';
+    div.onclick = () => openRecipe(currentWeek, i);
+    const tagCls = TAG_CLS[day.b] || 'tg-g';
+    const icon = PROTO_ICONS[day.b] || '🍽';
+    div.innerHTML = `
+      <div class="dc-bar" style="background:${accentColor}"></div>
+      <div class="dc-body">
+        <div class="dc-day">${day.n}</div>
+        <div class="dc-name">${day.m}</div>
+        <div class="dc-tags">
+          <span class="tag ${tagCls}">${icon} ${day.b}</span>
+          ${day.r?.gf ? '<span class="tag tg-g">✓ GF</span>' : ''}
+          ${day.batch ? '<span class="tag tg-b">🧊 batch</span>' : ''}
+          ${thId ? `<span class="tag tg-th">🎨 ${theme.name}</span>` : ''}
+        </div>
+      </div>
+      <div class="dc-chev">›</div>`;
+    list.appendChild(div);
   });
 
   fetchWeather();
+  document.getElementById('ical-wn').textContent = currentWeek+1;
 }
 
-function buildWeekSelector() {
-  const sel = document.getElementById('week-selector');
-  WEEKS.forEach((wk,i) => {
-    const opt = document.createElement('option');
-    opt.value = i;
-    opt.textContent = 'Week '+(i+1)+' ('+wk.season+')';
-    sel.appendChild(opt);
-  });
-}
-
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 // WEATHER
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 async function fetchWeather() {
-  const badge = document.getElementById('weather-badge');
-  const notice = document.getElementById('weather-swap-notice');
-  badge.style.display = 'flex';
-  document.getElementById('weather-text').innerHTML = '<span class="loading-spinner"></span> Loading...';
-  notice.style.display = 'none';
-
+  const wxEl = document.getElementById('h-wx');
+  const banner = document.getElementById('wx-banner');
+  banner.classList.remove('on');
+  wxEl.style.display = 'none';
   try {
-    // Get coordinates from zip via Open-Meteo geocoding
-    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${settings.zip}&count=1&language=en&format=json`);
-    const geoData = await geoRes.json();
-    if (!geoData.results || !geoData.results.length) throw new Error('ZIP not found');
-    const {latitude, longitude} = geoData.results[0];
-
-    // Get weekly forecast
-    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max&temperature_unit=fahrenheit&timezone=auto&forecast_days=7`);
-    const wData = await wRes.json();
-    const maxTemps = wData.daily.temperature_2m_max;
-    const avgHigh = Math.round(maxTemps.reduce((a,b)=>a+b,0)/maxTemps.length);
-    const peakHigh = Math.max(...maxTemps);
-
-    let icon = '🌤';
-    if (avgHigh >= 90) icon = '🥵';
-    else if (avgHigh >= 75) icon = '☀️';
-    else if (avgHigh <= 35) icon = '❄️';
-    else if (avgHigh <= 50) icon = '🧥';
-
-    document.getElementById('weather-icon').textContent = icon;
-    document.getElementById('weather-text').textContent = `Avg high ${avgHigh}°F this week`;
-
-    if (peakHigh >= 88) {
-      notice.style.display = 'flex';
-    }
-  } catch(e) {
-    document.getElementById('weather-text').textContent = 'Weather unavailable';
-  }
+    const g = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${settings.zip}&count=1&language=en&format=json`);
+    const gd = await g.json();
+    if (!gd.results?.length) return;
+    const {latitude:la,longitude:lo} = gd.results[0];
+    const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${la}&longitude=${lo}&daily=temperature_2m_max&temperature_unit=fahrenheit&timezone=auto&forecast_days=7`);
+    const wd = await w.json();
+    const temps = wd.daily.temperature_2m_max;
+    const avg = Math.round(temps.reduce((a,b)=>a+b,0)/temps.length);
+    const peak = Math.max(...temps);
+    const ico = avg>=90?'🥵':avg>=75?'☀️':avg<=35?'❄️':avg<=50?'🧥':'🌤';
+    wxEl.textContent = `${ico} ${avg}°F`;
+    wxEl.style.display = 'flex';
+    document.getElementById('h-wx').textContent = `${ico} ${avg}°F avg`;
+    if (peak >= 88) banner.classList.add('on');
+  } catch(e) {}
 }
 
-// ══════════════════════════════════════════════════════════════════
-// RECIPE MODAL
-// ══════════════════════════════════════════════════════════════════
-function openRecipe(weekIdx, dayIdx) {
-  const day = WEEKS[weekIdx].days[dayIdx];
-  const r = day.recipe;
+// ════════════════════════════════════════════════════════════════
+// RECIPE SHEET
+// ════════════════════════════════════════════════════════════════
+function recipeHTML(day) {
+  const r = day.r;
+  if (!r) return '';
+  const ings = r.i.map(i => `<div class="ing-row"><div class="ing-dot"></div><span class="ing-name">${i.n}</span><span class="ing-qty">${i.q}</span></div>`).join('');
+  const steps = r.s.map((s,idx) => `<div class="step-row"><div class="step-n">${idx+1}</div><div class="step-t">${s}</div></div>`).join('');
+  return `
+    <div class="rs-hdr">Ingredients</div>
+    <div class="ing-list">${ings}</div>
+    <div class="rs-hdr" style="margin-top:4px">Steps</div>
+    <div class="step-list" style="padding-bottom:4px">${steps}</div>
+    ${r.note ? `<div class="note-box note-tip">💡 ${r.note}</div>` : ''}
+    ${r.gfn ? `<div class="note-box note-gf">${r.gfn}</div>` : ''}
+    <div style="height:16px"></div>`;
+}
+
+function openRecipe(wkIdx, di) {
+  const day = getWeekData(wkIdx).days[di];
+  const r = day.r;
   if (!r) return;
-
-  document.getElementById('modal-content-header').innerHTML = `
-    <div class="modal-meal-title">${day.meal}</div>
-    <div class="modal-meta">
-      <span class="meta-pill meta-time">⏱ ${r.time}</span>
-      <span class="meta-pill meta-serves">👨‍👩‍👧‍👦 Serves ${r.serves}</span>
-      <span class="meta-pill meta-cost">💰 ${r.cost}</span>
-      ${r.gf ? '<span class="meta-pill meta-gf">✓ Gluten Free</span>' : ''}
-    </div>
-  `;
-
-  const ingHTML = r.ingredients.map(ing =>
-    `<li><span>${ing.name}</span><span class="ing-amount">${ing.qty}</span></li>`
-  ).join('');
-
-  const stepsHTML = r.steps.map(s => `<li>${s}</li>`).join('');
-
-  document.getElementById('modal-content-body').innerHTML = `
-    <div class="recipe-section-title">Ingredients</div>
-    <ul class="recipe-ingredients">${ingHTML}</ul>
-    <div class="recipe-section-title">Instructions</div>
-    <ol class="recipe-steps">${stepsHTML}</ol>
-    ${r.note ? `<div class="recipe-note">💡 ${r.note}</div>` : ''}
-    ${r.gfNote ? `<div class="gf-note">${r.gfNote}</div>` : ''}
-  `;
-
-  document.getElementById('recipe-modal').classList.add('open');
+  document.getElementById('r-title').textContent = day.m;
+  document.getElementById('r-meta').innerHTML = `
+    <span class="mc mc-t">⏱ ${r.t}</span>
+    <span class="mc mc-s">👨‍👩‍👧‍👦 Serves ${r.sv}</span>
+    <span class="mc mc-c">💰 ${r.cost}</span>
+    ${r.gf ? '<span class="mc mc-g">✓ GF</span>' : ''}`;
+  document.getElementById('r-body').innerHTML = recipeHTML(day);
+  openSheet('ov-recipe');
 }
 
-function closeRecipeModal() {
-  document.getElementById('recipe-modal').classList.remove('open');
-}
-function closeModal(e) {
-  if(e.target.id === 'recipe-modal') closeRecipeModal();
+// ════════════════════════════════════════════════════════════════
+// ALL RECIPES SHEET
+// ════════════════════════════════════════════════════════════════
+function openAllRecipes() {
+  const wk = getWeekData(currentWeek);
+  document.getElementById('ar-wn').textContent = currentWeek+1;
+  let html = '';
+  wk.days.forEach((day, i) => {
+    const accentColor = day.anchor==='taco'?'var(--ora)':day.anchor==='pizza'?'var(--red)':'var(--acc)';
+    html += `
+      <div style="margin:0 16px 6px;padding:14px 0 6px;border-bottom:1px solid var(--sep)">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--t3)">${day.n}</div>
+        <div style="font-size:17px;font-weight:900;margin:4px 0 2px;border-left:3px solid ${accentColor};padding-left:10px">${day.m}</div>
+        ${day.r ? `<div style="font-size:12px;color:var(--t2);font-weight:600;padding-left:10px">⏱ ${day.r.t} · 💰 ${day.r.cost} · Serves ${day.r.sv}</div>` : ''}
+      </div>
+      ${day.r ? recipeHTML(day) : ''}`;
+  });
+  document.getElementById('ar-body').innerHTML = html;
+  openSheet('ov-allrec');
 }
 
-// ══════════════════════════════════════════════════════════════════
-// SHOPPING LIST
-// ══════════════════════════════════════════════════════════════════
-function getAllIngredients(weekIdx) {
-  const wk = WEEKS[weekIdx];
-  const all = {};
+// ════════════════════════════════════════════════════════════════
+// PREP SHEET
+// ════════════════════════════════════════════════════════════════
+function openPrepSheet() {
+  const wk = getWeekData(currentWeek);
+  document.querySelectorAll('.prep-wn').forEach(el => el.textContent = currentWeek+1);
+
+  // Find batch cook items
+  const batchDays = wk.days.filter(d => d.batch);
+  // Find all prep tasks (ingredients that need advance work)
+  const needsThaw = [];
+  const needsRoast = [];
+  const needsMarinate = [];
+  const bigCooks = [];
+
   wk.days.forEach(day => {
-    if (!day.recipe) return;
-    day.recipe.ingredients.forEach(ing => {
-      const key = ing.name.toLowerCase().trim();
-      if (!all[key]) all[key] = {name: ing.name, qty: ing.qty, cat: ing.cat, key};
+    if (day.batch) bigCooks.push({name: day.m, night: day.n, time: day.r?.t});
+    if (day.r?.s?.some(s => /slow cooker|instant pot|batch/i.test(s))) {
+      if (!day.batch) needsRoast.push(day.n + ': ' + day.m);
+    }
+  });
+
+  // Extract frozen items needing thaw
+  wk.days.forEach(day => {
+    day.r?.i?.forEach(ing => {
+      if (ing.c === 'frozen' && !needsThaw.includes(ing.n)) needsThaw.push(ing.n);
     });
   });
-  return Object.values(all);
-}
 
-function renderShoppingList() {
-  const weekIdx = currentWeek;
-  const ings = getAllIngredients(weekIdx);
-  const byCategory = {};
-  ings.forEach(ing => {
-    const c = ing.cat || 'pantry';
-    if (!byCategory[c]) byCategory[c] = [];
-    byCategory[c].push(ing);
+  let html = '';
+
+  if (bigCooks.length) {
+    html += `<div class="rs-hdr">🔥 Big Cook Days</div><div class="prep-section">`;
+    bigCooks.forEach(bc => {
+      html += `<div class="prep-card">
+        <div class="prep-card-title">🗓 ${bc.night} — ${bc.name}</div>
+        <div class="prep-steps">
+          <div class="prep-step">Set aside ${bc.time||'extra time'} for this anchor cook</div>
+          <div class="prep-step">Make extra — this powers multiple meals this week</div>
+          <div class="prep-step">Label and refrigerate or freeze portions immediately after cooking</div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // Build a leftover chain
+  const leftoverChain = [];
+  wk.days.forEach(day => {
+    if (day.r?.note && day.r.note.toLowerCase().includes('leftover')) {
+      leftoverChain.push({night: day.n, meal: day.m, note: day.r.note});
+    }
   });
 
-  const catOrder = ['protein','produce','dairy','canned','frozen','pantry','bread','spices'];
+  if (leftoverChain.length) {
+    html += `<div class="rs-hdr">♻️ Leftover Strategy</div><div class="prep-section">`;
+    html += `<div class="prep-card"><div class="prep-card-title">Use leftovers intentionally</div><div class="prep-steps">`;
+    leftoverChain.forEach(lc => {
+      html += `<div class="prep-step">${lc.night}: ${lc.note}</div>`;
+    });
+    html += '</div></div></div>';
+  }
+
+  // Produce prep
+  const allProduce = [];
+  wk.days.forEach(day => {
+    day.r?.i?.filter(i => i.c === 'produce').forEach(ing => {
+      if (!allProduce.find(p => p.n === ing.n)) allProduce.push(ing);
+    });
+  });
+
+  if (allProduce.length) {
+    html += `<div class="rs-hdr">🥕 Produce Prep (do Sunday)</div><div class="prep-section">
+      <div class="prep-card"><div class="prep-card-title">Wash & prep in advance</div><div class="prep-steps">`;
+    allProduce.slice(0,8).forEach(p => {
+      html += `<div class="prep-step">${p.n}: wash, store in airtight container</div>`;
+    });
+    html += '</div></div></div>';
+  }
+
+  if (needsThaw.length) {
+    html += `<div class="rs-hdr">🧊 Thaw Reminders</div><div class="prep-section">
+      <div class="prep-card"><div class="prep-card-title">Move from freezer night before using</div><div class="prep-steps">`;
+    needsThaw.forEach(item => {
+      html += `<div class="prep-step">${item}: move to fridge night before</div>`;
+    });
+    html += '</div></div></div>';
+  }
+
+  // GF reminders
+  html += `<div class="rs-hdr">✅ GF Safety Checks</div><div class="prep-section">
+    <div class="prep-card"><div class="prep-card-title">Check these labels every week</div><div class="prep-steps">
+      <div class="prep-step">Broth/stock: must say "GF" or "gluten free" on label</div>
+      <div class="prep-step">Taco/fajita seasoning: McCormick Original is safe</div>
+      <div class="prep-step">Soy sauce: ONLY use tamari (San-J GF certified)</div>
+      <div class="prep-step">Pizza crust: TJ's GF crust is certified GF</div>
+      <div class="prep-step">Sausage: Aidells brand is GF certified</div>
+    </div></div></div>`;
+
+  html += `<div style="height:20px"></div>`;
+  document.getElementById('prep-body').innerHTML = html;
+  openSheet('ov-prep');
+}
+
+// ════════════════════════════════════════════════════════════════
+// THEME PICKER
+// ════════════════════════════════════════════════════════════════
+function openThemePicker() {
+  const currentThemeId = weekThemes[currentWeek] || getWeekData(currentWeek).themeId || 'classic';
+  const grid = document.getElementById('theme-grid');
+  grid.innerHTML = '';
+  THEMES.forEach(th => {
+    // Check if this theme has a themed week override
+    const hasData = th.id === 'classic' || !!THEMED_WEEKS[th.id];
+    const div = document.createElement('div');
+    div.className = 'theme-card' + (th.id === currentThemeId ? ' sel' : '') + (!hasData ? ' disabled' : '');
+    if (!hasData) div.style.opacity = '0.45';
+    div.innerHTML = `
+      <span class="tc-emoji">${th.emoji}</span>
+      <div class="tc-name">${th.name}</div>
+      <div class="tc-desc">${th.desc}</div>
+      ${!hasData ? '<div style="font-size:10px;color:var(--t3);margin-top:4px;font-weight:700">Coming soon</div>' : ''}
+      <div class="tc-check">✓</div>`;
+    if (hasData) div.onclick = () => selectTheme(th.id, div);
+    grid.appendChild(div);
+  });
+  openSheet('ov-theme');
+}
+
+function selectTheme(themeId, el) {
+  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  if (themeId === 'classic') {
+    delete weekThemes[currentWeek];
+  } else {
+    weekThemes[currentWeek] = themeId;
+  }
+  localStorage.setItem('mp_themes', JSON.stringify(weekThemes));
+  setTimeout(() => {
+    closeSheet('ov-theme');
+    renderWeek();
+    // Rebuild week selector
+    const sel = document.getElementById('wk-sel');
+    sel.innerHTML = '';
+    buildWeekSel();
+    sel.value = currentWeek;
+    showToast('Theme updated!');
+  }, 240);
+}
+
+// ════════════════════════════════════════════════════════════════
+// SHOPPING
+// ════════════════════════════════════════════════════════════════
+const CATS = {protein:'🥩 Protein',produce:'🥕 Produce',dairy:'🧀 Dairy & Eggs',canned:'🥡 Canned Goods',frozen:'🧊 Frozen',pantry:'🥫 Pantry & Dry',bread:'🍞 Bread',spices:'🌿 Spices'};
+const CAT_ORDER = ['protein','produce','dairy','canned','frozen','pantry','bread','spices'];
+
+function getWkIngs(idx) {
+  const map = {};
+  getWeekData(idx).days.forEach(day => {
+    day.r?.i?.forEach(ing => {
+      const k = ing.n.toLowerCase().trim();
+      if (!map[k]) map[k] = {name:ing.n, qty:ing.qty, cat:ing.c, key:k};
+    });
+  });
+  return Object.values(map);
+}
+
+function renderShop() {
+  document.getElementById('shop-sub').textContent = `Week ${currentWeek+1} · Check what you have`;
+  const ings = getWkIngs(currentWeek);
+  const byCat = {};
+  ings.forEach(i => { if (!byCat[i.cat]) byCat[i.cat]=[]; byCat[i.cat].push(i); });
   let html = '';
-  catOrder.forEach(cat => {
-    if (!byCategory[cat]) return;
-    html += `<div class="ingredient-category">
-      <h3>${CATS[cat] || cat}</h3>`;
-    byCategory[cat].forEach(ing => {
-      const ck = `w${weekIdx}_${ing.key}`;
-      const isChecked = checkedIngredients[ck];
-      html += `
-        <div class="ingredient-item${isChecked?' checked':''}" onclick="toggleIngredient('${ck}',this)">
-          <div class="ing-check"></div>
-          <span class="ing-name">${ing.name}</span>
-          <span class="ing-qty">${ing.qty}</span>
-          <button class="walmart-btn" onclick="searchWalmart('${ing.name}',event)" title="Search on Walmart">W</button>
-        </div>`;
+  CAT_ORDER.forEach(cat => {
+    if (!byCat[cat]) return;
+    html += `<div class="cat-hdr">${CATS[cat]||cat}</div><div class="shop-grp">`;
+    byCat[cat].forEach(ing => {
+      const ck = `w${currentWeek}_${ing.key}`;
+      const done = checked[ck];
+      html += `<div class="ck-row${done?' done':''}" onclick="toggleCk('${ck}',this)">
+        <div class="ck-circle"><span class="ck-chk">✓</span></div>
+        <span class="ck-name">${ing.name}</span>
+        <span class="ck-qty">${ing.qty}</span>
+        <button class="w-btn" onclick="wSearch('${ing.name.replace(/'/g,"\\'")}',event)" title="Search Walmart">W</button>
+      </div>`;
     });
     html += '</div>';
   });
-
-  document.getElementById('shopping-list-content').innerHTML = html;
-  document.getElementById('shop-week-num').textContent = weekIdx+1;
+  document.getElementById('shop-content').innerHTML = html;
 }
 
-function toggleIngredient(key, el) {
-  if (event.target.classList.contains('walmart-btn')) return;
-  checkedIngredients[key] = !checkedIngredients[key];
-  localStorage.setItem('checkedIngredients', JSON.stringify(checkedIngredients));
-  el.classList.toggle('checked', checkedIngredients[key]);
+function toggleCk(key, el) {
+  if (event.target.classList.contains('w-btn')) return;
+  checked[key] = !checked[key];
+  localStorage.setItem('mp_ck', JSON.stringify(checked));
+  el.classList.toggle('done', checked[key]);
+  const circle = el.querySelector('.ck-circle');
+  circle.style.background = checked[key] ? 'var(--acc)' : '';
+  circle.style.borderColor = checked[key] ? 'var(--acc)' : '';
 }
 
 function clearChecked() {
-  const weekIdx = currentWeek;
-  Object.keys(checkedIngredients).forEach(k => {
-    if (k.startsWith('w'+weekIdx+'_')) delete checkedIngredients[k];
-  });
-  localStorage.setItem('checkedIngredients', JSON.stringify(checkedIngredients));
-  renderShoppingList();
+  const pfx = `w${currentWeek}_`;
+  Object.keys(checked).forEach(k => { if (k.startsWith(pfx)) delete checked[k]; });
+  localStorage.setItem('mp_ck', JSON.stringify(checked));
+  renderShop(); showToast('Cleared ✓');
 }
 
-function searchWalmart(item, e) {
+function wSearch(item, e) {
   e.stopPropagation();
-  const q = encodeURIComponent(item);
-  window.open(`https://www.walmart.com/search?q=${q}`, '_blank');
+  window.open(`https://www.walmart.com/search?q=${encodeURIComponent(item)}`, '_blank');
 }
 
-function openWalmartAll() {
-  const weekIdx = currentWeek;
-  const ings = getAllIngredients(weekIdx);
-  const unchecked = ings.filter(ing => !checkedIngredients[`w${weekIdx}_${ing.key}`]);
-  if (!unchecked.length) { showToast('All items are already checked off!'); return; }
-  // Open first 3 unchecked items to avoid popup blocker
-  unchecked.slice(0,3).forEach((ing,i) => {
-    setTimeout(() => searchWalmart(ing.name, {stopPropagation:()=>{}}), i*400);
-  });
-  if (unchecked.length > 3) showToast(`Opening first 3 of ${unchecked.length} items. Browsers block bulk popups.`);
+function walmartAll() {
+  const ings = getWkIngs(currentWeek);
+  const unc = ings.filter(i => !checked[`w${currentWeek}_${i.key}`]);
+  if (!unc.length) { showToast('All items checked!'); return; }
+  unc.slice(0,3).forEach((ing,i) => setTimeout(() => window.open(`https://www.walmart.com/search?q=${encodeURIComponent(ing.name)}`,'_blank'), i*500));
+  showToast(unc.length > 3 ? `Opened 3 of ${unc.length} (popup limit)` : `Opening ${unc.length} Walmart searches`);
 }
 
-function exportShoppingList() {
-  const weekIdx = currentWeek;
-  const ings = getAllIngredients(weekIdx);
-  const unchecked = ings.filter(ing => !checkedIngredients[`w${weekIdx}_${ing.key}`]);
-  const text = `Week ${weekIdx+1} Shopping List (${WEEKS[weekIdx].season})\n\n` +
-    unchecked.map(ing => `• ${ing.name} — ${ing.qty}`).join('\n');
-  navigator.clipboard.writeText(text).then(() => showToast('Shopping list copied to clipboard!'));
+function copyList() {
+  const ings = getWkIngs(currentWeek);
+  const unc = ings.filter(i => !checked[`w${currentWeek}_${i.key}`]);
+  const text = `Week ${currentWeek+1} Shopping List\n\n` + unc.map(i => `• ${i.name} — ${i.qty}`).join('\n');
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 // CALENDAR
-// ══════════════════════════════════════════════════════════════════
-function changeMonth(delta) {
-  calMonth += delta;
-  if (calMonth > 11) { calMonth = 0; calYear++; }
-  if (calMonth < 0) { calMonth = 11; calYear--; }
-  renderCalendar();
+// ════════════════════════════════════════════════════════════════
+function chMonth(d) {
+  calMonth += d;
+  if (calMonth > 11) { calMonth=0; calYear++; }
+  if (calMonth < 0) { calMonth=11; calYear--; }
+  renderCal();
 }
 
-function getWeekAndDayForDate(date) {
+function getDayInfo(date) {
   const start = new Date(settings.startDate);
-  const diffDays = Math.floor((date - start) / (1000*60*60*24));
-  if (diffDays < 0) return null;
-  const weekIdx = Math.floor(diffDays / 7) % WEEKS.length;
-  const dayIdx = diffDays % 7;
-  return {weekIdx, dayIdx};
+  const diff = Math.floor((date - start) / 86400000);
+  if (diff < 0) return null;
+  const wkIdx = Math.floor(diff / 7) % 26;
+  const di = diff % 7;
+  const wk = getWeekData(wkIdx);
+  return wk?.days[di] ? {wkIdx, di, day: wk.days[di]} : null;
 }
 
-function renderCalendar() {
-  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('cal-month-heading').textContent = monthNames[calMonth]+' '+calYear;
-
-  const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+function renderCal() {
+  const MN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-hd').textContent = `${MN[calMonth]} ${calYear}`;
+  const dim = new Date(calYear, calMonth+1, 0).getDate();
+  const firstDow = new Date(calYear, calMonth, 1).getDay();
   const today = new Date();
-
-  let html = '<div class="cal-grid">';
-  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
-    html += `<div class="cal-dow">${d}</div>`;
-  });
-
-  for(let i=0;i<firstDay;i++) html += `<div class="cal-cell empty"></div>`;
-  for(let d=1;d<=daysInMonth;d++) {
-    const cellDate = new Date(calYear, calMonth, d);
-    const isToday = cellDate.toDateString() === today.toDateString();
-    const info = getWeekAndDayForDate(cellDate);
-    let mealHtml = '';
-    if (info && WEEKS[info.weekIdx] && WEEKS[info.weekIdx].days[info.dayIdx]) {
-      const dayData = WEEKS[info.weekIdx].days[info.dayIdx];
-      const cls = dayData.anchor==='taco'?' taco':dayData.anchor==='pizza'?' pizza':'';
-      const dotColor = {chicken:'#D97706',turkey:'#3D6B4F',pork:'#DC2626',fish:'#2563EB',plant:'#059669',mixed:'#7C3AED'}[dayData.badge]||'#888';
-      mealHtml = `<div class="cal-meal${cls}"><span class="cal-meal-dot" style="background:${dotColor}"></span>${dayData.meal.replace('🌮 Taco Tuesday — ','').replace('🍕 Pizza Friday — ','').substring(0,28)}</div>`;
+  const dotColors = {chicken:'#FF9F0A',turkey:'#30D158',pork:'#FF453A',fish:'#0A84FF',plant:'#30D158',beef:'#FF453A',mixed:'#BF5AF2'};
+  let h = '<div class="cal-dow">';
+  ['S','M','T','W','T','F','S'].forEach(d => h += `<div class="cdow">${d}</div>`);
+  h += '</div><div class="cal-cells">';
+  for (let i=0;i<firstDow;i++) h += '<div class="cc emp"></div>';
+  for (let d=1;d<=dim;d++) {
+    const dt = new Date(calYear,calMonth,d);
+    const isToday = dt.toDateString()===today.toDateString();
+    const info = getDayInfo(dt);
+    let inner = `<div class="cc-d">${d}</div>`;
+    if (info) {
+      const day = info.day;
+      const dc = dotColors[day.b]||'#888';
+      const isTaco = day.anchor==='taco', isPizza = day.anchor==='pizza';
+      const short = day.m.replace('🌮 Taco Tuesday — ','').replace('🍕 Pizza Friday — ','').substring(0,20);
+      inner += `<div class="cc-dot" style="background:${dc}"></div><div class="cc-m${isTaco?' taco':isPizza?' pizza':''}">${short}</div>`;
     }
-    html += `<div class="cal-cell${isToday?' today':''}" onclick="${info?`goToWeek(${info.weekIdx});switchView('planner')`:''}">${`<div class="cal-date">${d}</div>`}${mealHtml}</div>`;
+    h += `<div class="cc${isToday?' today':''}" onclick="${info?`goWk(${info.wkIdx});switchTab('week',document.querySelectorAll('.tb')[0])`:''}">${inner}</div>`;
   }
-  html += '</div>';
-  document.getElementById('cal-grid-wrap').innerHTML = html;
+  h += '</div>';
+  document.getElementById('cal-wrap').innerHTML = h;
+  const mn = new Date(calYear,calMonth).toLocaleString('default',{month:'long'});
+  document.getElementById('ical-md').textContent = `Download ${mn} ${calYear} .ics`;
 }
 
-// ══════════════════════════════════════════════════════════════════
-// ICAL EXPORT
-// ══════════════════════════════════════════════════════════════════
-function formatICSDate(date) {
-  return date.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
-}
-
-function generateICS(events) {
-  let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Family Meal Planner//EN\r\nCALNAME:Family Dinners\r\nX-WR-CALNAME:Family Dinners\r\n';
-  events.forEach(ev => {
-    ics += `BEGIN:VEVENT\r\nUID:${ev.uid}\r\nDTSTART;VALUE=DATE:${ev.date}\r\nDTEND;VALUE=DATE:${ev.dateEnd}\r\nSUMMARY:🍽 ${ev.title}\r\nDESCRIPTION:${ev.description}\r\nCATEGORIES:DINNER\r\nEND:VEVENT\r\n`;
-  });
-  ics += 'END:VCALENDAR';
-  return ics;
-}
-
-function getEventsForWeek(weekIdx) {
+// ════════════════════════════════════════════════════════════════
+// ICAL
+// ════════════════════════════════════════════════════════════════
+function getWkEvents(idx) {
   const start = new Date(settings.startDate);
-  const weekStart = new Date(start.getTime() + weekIdx * 7 * 24*60*60*1000);
-  const wk = WEEKS[weekIdx];
-  return wk.days.map((day, dayIdx) => {
-    const d = new Date(weekStart.getTime() + dayIdx * 24*60*60*1000);
-    const dateStr = d.toISOString().split('T')[0].replace(/-/g,'');
-    const nextDay = new Date(d.getTime() + 24*60*60*1000);
-    const dateEndStr = nextDay.toISOString().split('T')[0].replace(/-/g,'');
-    const r = day.recipe;
-    const desc = r ? `Serves: ${r.serves}\\nEst. cost: ${r.cost}\\nTime: ${r.time}\\n${r.gfNote||''}` : '';
-    return {uid:`meal-w${weekIdx}-d${dayIdx}@familyplan`, date:dateStr, dateEnd:dateEndStr, title:day.meal, description:desc};
+  const wkStart = new Date(start.getTime() + idx * 7 * 86400000);
+  return getWeekData(idx).days.map((day, di) => {
+    const d = new Date(wkStart.getTime() + di * 86400000);
+    const ds = d.toISOString().split('T')[0].replace(/-/g,'');
+    const nds = new Date(d.getTime()+86400000).toISOString().split('T')[0].replace(/-/g,'');
+    const r = day.r;
+    const desc = r ? `Serves: ${r.sv}\\nCost: ${r.cost}\\nTime: ${r.t}` : '';
+    return {uid:`mp-w${idx}-d${di}@fp`, date:ds, end:nds, title:day.m, desc};
   });
 }
 
-function downloadICS(type) {
-  let events = [];
-  let filename = 'meal-plan.ics';
-
-  if (type==='week') {
-    events = getEventsForWeek(currentWeek);
-    filename = `meal-plan-week-${currentWeek+1}.ics`;
-  } else if (type==='all') {
-    WEEKS.forEach((_,i) => events = events.concat(getEventsForWeek(i)));
-    filename = 'meal-plan-26-weeks.ics';
-  } else if (type==='month') {
-    const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
-    for(let d=1; d<=daysInMonth; d++) {
-      const cellDate = new Date(calYear, calMonth, d);
-      const info = getWeekAndDayForDate(cellDate);
-      if (info && WEEKS[info.weekIdx] && WEEKS[info.weekIdx].days[info.dayIdx]) {
-        const day = WEEKS[info.weekIdx].days[info.dayIdx];
-        const dateStr = cellDate.toISOString().split('T')[0].replace(/-/g,'');
-        const nextDay = new Date(cellDate.getTime() + 24*60*60*1000);
-        const dateEndStr = nextDay.toISOString().split('T')[0].replace(/-/g,'');
-        const r = day.recipe;
-        const desc = r ? `Serves: ${r.serves}\\nEst. cost: ${r.cost}` : '';
-        events.push({uid:`meal-m${calMonth}-d${d}@familyplan`, date:dateStr, dateEnd:dateEndStr, title:day.meal, description:desc});
+function dlICS(type) {
+  let evs = [], fn = 'meals.ics';
+  if (type==='week') { evs=getWkEvents(currentWeek); fn=`meals-week-${currentWeek+1}.ics`; }
+  else if (type==='all') { for(let i=0;i<26;i++) evs=evs.concat(getWkEvents(i)); fn='meals-26-weeks.ics'; }
+  else {
+    const dim = new Date(calYear,calMonth+1,0).getDate();
+    for (let d=1;d<=dim;d++) {
+      const info = getDayInfo(new Date(calYear,calMonth,d));
+      if (info) {
+        const dt = new Date(calYear,calMonth,d);
+        const ds = dt.toISOString().split('T')[0].replace(/-/g,'');
+        const nds = new Date(dt.getTime()+86400000).toISOString().split('T')[0].replace(/-/g,'');
+        evs.push({uid:`mp-m${calMonth}-d${d}@fp`,date:ds,end:nds,title:info.day.m,desc:''});
       }
     }
-    const mn = new Date(calYear,calMonth).toLocaleString('default',{month:'long'});
-    filename = `meal-plan-${mn}-${calYear}.ics`;
+    fn = `meals-${new Date(calYear,calMonth).toLocaleString('default',{month:'long'})}-${calYear}.ics`;
   }
-
-  const ics = generateICS(events);
-  const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('iCal file downloaded!');
+  let ics='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Family Meals//EN\r\nX-WR-CALNAME:Family Dinners\r\n';
+  evs.forEach(e => { ics+=`BEGIN:VEVENT\r\nUID:${e.uid}\r\nDTSTART;VALUE=DATE:${e.date}\r\nDTEND;VALUE=DATE:${e.end}\r\nSUMMARY:🍽 ${e.title}\r\nDESCRIPTION:${e.desc}\r\nEND:VEVENT\r\n`; });
+  ics+='END:VCALENDAR';
+  const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=fn;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url); showToast('iCal downloaded!');
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
+// SHEET HELPERS
+// ════════════════════════════════════════════════════════════════
+function openSheet(id) {
+  document.getElementById(id).classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function closeSheet(id) {
+  document.getElementById(id).classList.remove('on');
+  document.body.style.overflow='';
+}
+function closeOverlay(id, e) {
+  if (e.target.id===id) closeSheet(id);
+}
+
+// ════════════════════════════════════════════════════════════════
 // SETTINGS
-// ══════════════════════════════════════════════════════════════════
-function openSettings() {
-  document.getElementById('setting-zip').value = settings.zip;
-  document.getElementById('setting-start-date').value = settings.startDate;
-  document.getElementById('setting-family-size').value = settings.familySize;
-  document.getElementById('settings-modal').classList.add('open');
-}
-function closeSettingsModal(e) {
-  if (!e || e.target.id==='settings-modal') {
-    document.getElementById('settings-modal').classList.remove('open');
-  }
-}
+// ════════════════════════════════════════════════════════════════
 function saveSettings() {
-  settings.zip = document.getElementById('setting-zip').value || '97201';
-  settings.startDate = document.getElementById('setting-start-date').value || '2025-01-05';
-  settings.familySize = document.getElementById('setting-family-size').value;
-  localStorage.setItem('mealPlanSettings', JSON.stringify(settings));
-  document.getElementById('settings-modal').classList.remove('open');
-  fetchWeather();
-  showToast('Settings saved!');
+  settings.zip = document.getElementById('s-zip').value || '97201';
+  settings.startDate = document.getElementById('s-date').value || '2025-01-05';
+  settings.familySize = document.getElementById('s-fam').value;
+  localStorage.setItem('mp_set', JSON.stringify(settings));
+  fetchWeather(); showToast('Saved ✓');
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 // TOAST
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 // INIT
-// ══════════════════════════════════════════════════════════════════
-buildWeekSelector();
+// ════════════════════════════════════════════════════════════════
+buildWeekSel();
 currentWeek = detectCurrentWeek();
-document.getElementById('week-selector').value = currentWeek;
+document.getElementById('wk-sel').value = currentWeek;
 renderWeek();
-
 </script>
 
 </body>
