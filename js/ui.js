@@ -31,18 +31,28 @@ export function syncMoreScreen(state) {
   if (protein) protein.value = state.settings.defaultProtein;
 }
 
-export function renderWeekView({ state, getWeekData, getEffectiveProtein, fetchWeather }) {
+export function renderWeekView({
+  state,
+  getWeekData,
+  getEffectiveProtein,
+  fetchWeather,
+  THEMES,
+  PROTEIN_META,
+  PROTO_ICONS,
+  TAG_CLS
+}) {
   const wk = getWeekData(state.currentWeek);
   const themeId = state.weekThemes[state.currentWeek];
-  const theme = (window.THEMES || []).find((t) => t.id === (themeId || wk.themeId)) || {
-    name: 'Classic Family',
-    emoji: '🏠',
-    desc: 'Comfort food staples the whole family loves',
-    heroGrad: 'linear-gradient(140deg,#1a2c1e,#0d1a0f)',
-    heroBorder: 'rgba(48,209,88,.18)',
-    heroGlow: 'radial-gradient(circle,rgba(48,209,88,.1),transparent 70%)',
-    heroAcc: '#30D158'
-  };
+  const theme =
+    THEMES.find((t) => t.id === (themeId || wk.themeId)) || {
+      name: 'Classic Family',
+      emoji: '🏠',
+      desc: 'Comfort food staples the whole family loves',
+      heroGrad: 'linear-gradient(140deg,#1a2c1e,#0d1a0f)',
+      heroBorder: 'rgba(48,209,88,.18)',
+      heroGlow: 'radial-gradient(circle,rgba(48,209,88,.1),transparent 70%)',
+      heroAcc: '#30D158'
+    };
 
   const hero = $('#hero-card');
   if (hero) {
@@ -67,7 +77,7 @@ export function renderWeekView({ state, getWeekData, getEffectiveProtein, fetchW
   if (hTheme) hTheme.textContent = theme.desc;
 
   const effectiveProtein = getEffectiveProtein(state.currentWeek);
-  const meta = (window.PROTEIN_META || {})[effectiveProtein] || { emoji: '🍽' };
+  const meta = PROTEIN_META[effectiveProtein] || { emoji: '🍽' };
 
   if (hProtein) {
     hProtein.textContent = `${meta.emoji} ${effectiveProtein} week`;
@@ -91,8 +101,8 @@ export function renderWeekView({ state, getWeekData, getEffectiveProtein, fetchW
       day.anchor === 'pizza' ? 'var(--red)' :
       'var(--acc)';
 
-    const tagCls = (window.TAG_CLS || {})[day.b] || 'tg-g';
-    const icon = (window.PROTO_ICONS || {})[day.b] || '🍽';
+    const tagCls = TAG_CLS[day.b] || 'tg-g';
+    const icon = PROTO_ICONS[day.b] || '🍽';
 
     const div = document.createElement('div');
     div.className = 'day-card';
@@ -117,7 +127,7 @@ export function renderWeekView({ state, getWeekData, getEffectiveProtein, fetchW
   fetchWeather?.();
 }
 
-export function renderShoppingView({ state, getWkIngs }) {
+export function renderShoppingView({ state, getWkIngs, CATS, CAT_ORDER }) {
   const sub = $('#shop-sub');
   if (sub) sub.textContent = `Week ${state.currentWeek + 1} · Check what you have`;
 
@@ -134,10 +144,10 @@ export function renderShoppingView({ state, getWkIngs }) {
 
   let html = '';
 
-  (window.CAT_ORDER || []).forEach((cat) => {
+  CAT_ORDER.forEach((cat) => {
     if (!byCat[cat]) return;
 
-    html += `<div class="cat-hdr">${escapeHtml((window.CATS || {})[cat] || cat)}</div>`;
+    html += `<div class="cat-hdr">${escapeHtml(CATS[cat] || cat)}</div>`;
     html += `<div class="shop-grp">`;
 
     byCat[cat].forEach((ing) => {
@@ -149,7 +159,7 @@ export function renderShoppingView({ state, getWkIngs }) {
           <div class="ck-circle"><span class="ck-chk">✓</span></div>
           <span class="ck-name">${escapeHtml(ing.name)}</span>
           <span class="ck-qty">${escapeHtml(ing.qty)}</span>
-          <button class="w-btn" onclick="window.wSearch('${escapeHtml(ing.name).replace(/'/g, "\\'")}', event)" title="Search Walmart">W</button>
+          <button class="w-btn" onclick="window.wSearch(${JSON.stringify(ing.name)}, event)" title="Search Walmart">W</button>
         </div>
       `;
     });
@@ -227,15 +237,17 @@ export function renderCalendarView({ state, getDayInfo }) {
   }
 }
 
-export function renderThemePicker({ state, THEMES, THEMED_WEEKS }) {
+export function renderThemePicker({ state, THEMES, allPlans }) {
   const grid = $('#theme-grid');
   if (!grid) return;
 
   const currentThemeId = state.weekThemes[state.currentWeek] || 'classic';
   grid.innerHTML = '';
 
+  const availableCuisineIds = new Set((allPlans || []).map((p) => p.cuisine).filter(Boolean));
+
   THEMES.forEach((th) => {
-    const hasData = th.id === 'classic' || !!THEMED_WEEKS[th.id];
+    const hasData = th.id === 'classic' || availableCuisineIds.has(th.id);
     const div = document.createElement('div');
     div.className = `theme-card${th.id === currentThemeId ? ' sel' : ''}`;
     if (!hasData) div.style.opacity = '0.45';
@@ -248,10 +260,7 @@ export function renderThemePicker({ state, THEMES, THEMED_WEEKS }) {
       <div class="tc-check">✓</div>
     `;
 
-    if (hasData) {
-      div.onclick = () => window.selectTheme(th.id);
-    }
-
+    if (hasData) div.onclick = () => window.selectTheme(th.id);
     grid.appendChild(div);
   });
 }
