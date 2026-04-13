@@ -10,7 +10,11 @@ import {
   ALL_PLANS
 } from '../data/index.js';
 
-import { getFilteredPlans, getPlanForWeekIndex } from '../data/planners.js';
+import {
+  getFilteredPlans,
+  getPlanForWeekIndex,
+  getPlanSafe
+} from '../data/planners.js';
 
 import {
   $,
@@ -48,7 +52,9 @@ const DEFAULT_SETTINGS = {
   zip: '97201',
   startDate: '2025-01-05',
   familySize: '4',
-  defaultProtein: 'Turkey'
+  defaultProtein: 'Turkey',
+  seasonFilter: '',
+  weatherFilter: ''
 };
 
 export const state = {
@@ -68,13 +74,26 @@ function persist(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+function getAllPlansSafe() {
+  return Array.isArray(ALL_PLANS) ? ALL_PLANS : [];
+}
+
+function getDefaultPlan() {
+  const plans = getAllPlansSafe();
+  return plans.length ? plans[0] : null;
+}
+
 export function getEffectiveProtein(idx) {
-  return (
-    state.weekProteins[idx] ||
-    state.settings.defaultProtein ||
-    BASE_WEEKS[idx % BASE_WEEKS.length].protein ||
-    'Turkey'
-  );
+  const weekOverride = state.weekProteins[idx];
+  if (weekOverride) return weekOverride;
+
+  const defaultProtein = state.settings.defaultProtein;
+  if (defaultProtein) return defaultProtein;
+
+  const fallbackPlan = getDefaultPlan();
+  if (fallbackPlan?.protein) return fallbackPlan.protein;
+
+  return 'Turkey';
 }
 
 function normalizeProteinName(original, protein) {
@@ -108,14 +127,14 @@ function normalizeProteinName(original, protein) {
 }
 
 function rewriteTextProtein(text, protein) {
-  return text
+  return String(text)
     .replace(/\bground turkey\b/gi, protein === 'Fish' ? 'fish' : protein.toLowerCase())
     .replace(/\bturkey\b/gi, protein.toLowerCase())
     .replace(/\bchicken\b/gi, protein.toLowerCase());
 }
 
 function rewriteMealProtein(name, protein) {
-  let out = name;
+  let out = String(name);
 
   out = out.replace(/turkey/gi, protein);
   out = out.replace(/chicken/gi, protein);
@@ -139,7 +158,7 @@ function rewriteMealProtein(name, protein) {
 
 function rewriteIngredientProtein(ing, protein) {
   const out = { ...ing };
-  const low = out.n.toLowerCase();
+  const low = String(out.n || '').toLowerCase();
 
   if (ing.c === 'protein') {
     if (/(turkey|chicken|salmon|shrimp|sausage)/i.test(out.n)) {
@@ -157,7 +176,7 @@ function applyProteinOverride(data, idx) {
   const protein = getEffectiveProtein(idx);
   data.protein = protein;
 
-  data.days = data.days.map((day) => {
+  data.days = (data.days || []).map((day) => {
     const d = clone(day);
 
     if (!d.anchor && d.b !== 'plant' && d.b !== 'mixed') {
@@ -182,15 +201,49 @@ function applyProteinOverride(data, idx) {
   return data;
 }
 
+function getCuisineFilterForWeek(idx) {
+  const themeId = state.weekThemes[idx] || null;
+  if (!themeId || themeId === 'classic') return null;
+  return themeId;
+}
+
+function getPlannerOptionsForWeek(idx) {
+  return {
+    cuisine: getCuisineFilterForWeek(idx),
+    season: state.settings.seasonFilter || null,
+    protein: null,
+    weather: state.settings.weatherFilter || null,
+    tags: []
+  };
+}
+
 export function getWeekData(idx) {
-  const themeId = state.weekThemes[idx];
-  const source =
-    themeId && THEMED_WEEKS[themeId]
-      ? THEMED_WEEKS[themeId]
-      : BASE_WEEKS[idx % BASE_WEEKS.length];
+  const options = getPlannerOptionsForWeek(idx);
+
+  const plan =
+    typeof getPlanSafe === 'function'
+      ? getPlanSafe(idx, options)
+      : getPlanForWeekIndex(idx, getFilteredPlans(options));
+
+  const source = plan || getDefaultPlan();
+  if (!source) {
+    return {
+      id: 'empty-plan',
+      name: 'No plans loaded',
+      cuisine: 'classic',
+      season: 'all',
+      weather: [],
+      protein: getEffectiveProtein(idx),
+      themeId: 'classic',
+      tags: [],
+      days: [],
+      weekIdx: idx
+    };
+  }
 
   const data = clone(source);
   data.weekIdx = idx;
+
   return applyProteinOverride(data, idx);
 }
 
@@ -210,7 +263,9 @@ export function buildWeekSel() {
   for (let i = 0; i < TOTAL_WEEKS; i++) {
     const d = getWeekData(i);
     const thId = state.weekThemes[i];
-    const thName = thId ? (THEMES.find((t) => t.id === thId)?.name || '') : d.season;
+    const thName = thId
+      ? (THEMES.find((t) => t.id === thId)?.name || '')
+      : (d.season || 'Plan');
 
     const o = document.createElement('option');
     o.value = String(i);
@@ -231,7 +286,7 @@ export function getWkIngs(idx) {
 
   getWeekData(idx).days.forEach((day) => {
     day.r?.i?.forEach((ing) => {
-      const k = ing.n.toLowerCase().trim();
+      const k = String(ing.n).toLowerCase().trim();
       if (!map[k]) {
         map[k] = {
           name: ing.n,
@@ -283,7 +338,6 @@ export function wSearch(item, e) {
 export function switchTab(t, btn) {
   $$('.screen').forEach((s) => s.classList.add('hidden'));
   $$('.tb').forEach((b) => b.classList.remove('active'));
-
   $(`#s-${t}`)?.classList.remove('hidden');
   btn.classList.add('active');
   updateTabState(t);
@@ -310,13 +364,16 @@ export async function fetchWeather() {
     if (!gd.results?.length) return;
 
     const { latitude: la, longitude: lo } = gd.results[0];
+
     const w = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${la}&longitude=${lo}&daily=temperature_2m_max&temperature_unit=fahrenheit&timezone=auto&forecast_days=7`
     );
     const wd = await w.json();
+
     const temps = wd.daily.temperature_2m_max;
     const avg = Math.round(temps.reduce((a, b) => a + b, 0) / temps.length);
     const peak = Math.max(...temps);
+
     const ico =
       avg >= 90 ? '🥵' :
       avg >= 75 ? '☀️' :
@@ -336,27 +393,36 @@ export function renderWeek() {
     state,
     getWeekData,
     getEffectiveProtein,
-    fetchWeather
+    fetchWeather,
+    THEMES,
+    PROTEIN_META,
+    PROTO_ICONS,
+    TAG_CLS
   });
 }
 
 export function renderShop() {
   renderShoppingView({
     state,
-    getWkIngs
+    getWkIngs,
+    CATS,
+    CAT_ORDER
   });
 }
 
 export function chMonth(d) {
   state.calMonth += d;
+
   if (state.calMonth > 11) {
     state.calMonth = 0;
     state.calYear++;
   }
+
   if (state.calMonth < 0) {
     state.calMonth = 11;
     state.calYear--;
   }
+
   renderCal();
 }
 
@@ -441,7 +507,7 @@ export function openThemePicker() {
   renderThemePicker({
     state,
     THEMES,
-    THEMED_WEEKS
+    allPlans: ALL_PLANS
   });
   openSheet('ov-theme');
 }
@@ -478,8 +544,10 @@ export function selectProtein(protein) {
     closeSheet('ov-protein');
     buildWeekSel();
     renderWeek();
+
     if (!$('#s-shop')?.classList.contains('hidden')) renderShop();
     if (!$('#s-cal')?.classList.contains('hidden')) renderCal();
+
     showToast(`Protein set to ${protein}`);
   }, 220);
 }
@@ -538,19 +606,23 @@ export function dlICS(type) {
   }
 
   let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Family Meals//EN\r\nX-WR-CALNAME:Family Dinners\r\n';
+
   evs.forEach((e) => {
     ics += `BEGIN:VEVENT\r\nUID:${e.uid}\r\nDTSTART;VALUE=DATE:${e.date}\r\nDTEND;VALUE=DATE:${e.end}\r\nSUMMARY:🍽 ${e.title}\r\nDESCRIPTION:${e.desc}\r\nEND:VEVENT\r\n`;
   });
+
   ics += 'END:VCALENDAR';
 
   const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
+
   a.href = url;
   a.download = fn;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+
   URL.revokeObjectURL(url);
   showToast('iCal downloaded');
 }
@@ -570,7 +642,13 @@ export function saveSettings() {
 
 function bindGlobals() {
   window.state = state;
-  window.goWk = goWk;
+  window.currentWeek = state.currentWeek;
+
+  window.goWk = (n) => {
+    goWk(n);
+    window.currentWeek = state.currentWeek;
+  };
+
   window.switchTab = switchTab;
   window.openRecipe = openRecipe;
   window.openAllRecipes = openAllRecipes;
@@ -579,7 +657,10 @@ function bindGlobals() {
   window.openProteinPicker = openProteinPicker;
   window.selectTheme = selectTheme;
   window.selectProtein = selectProtein;
-  window.toggleCk = toggleCk;
+  window.toggleCk = (key, el, e) => {
+    if (e?.target?.classList?.contains('w-btn')) return;
+    toggleCk(key, el);
+  };
   window.clearChecked = clearChecked;
   window.copyList = copyList;
   window.wSearch = wSearch;
@@ -593,7 +674,9 @@ function bindGlobals() {
 function boot() {
   bindGlobals();
   buildWeekSel();
+
   state.currentWeek = detectCurrentWeek();
+  window.currentWeek = state.currentWeek;
 
   const sel = $('#wk-sel');
   if (sel) sel.value = String(state.currentWeek);
