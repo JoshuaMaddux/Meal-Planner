@@ -8,9 +8,9 @@ import {
   CATS,
   CAT_ORDER,
   ALL_PLANS
-} from './data/index.js';
+} from '../data/index.js';
 
-import { getFilteredPlans, getPlanForWeekIndex } from './data/planners.js';
+import { getFilteredPlans, getPlanForWeekIndex } from '../data/planners.js';
 
 import {
   $,
