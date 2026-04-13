@@ -1,249 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#000000">
-  <title>Family Meals</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+
+<title>Family Meals</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/styles.css">
 </head>
+
 <body>
 
-  <div id="s-week" class="screen">
-    <div class="sb"></div>
-    <div class="scroller">
-      <div class="pg-title">Dinners</div>
-      <div class="pg-sub" id="wk-sub">Week 1 · Winter</div>
-      <div id="wx-banner" class="wx-banner">☀️ Hot week, lighter meals recommended</div>
+<!-- WEEK -->
+<div id="s-week" class="screen">
+  <div class="sb"></div>
+  <div class="scroller">
+    <div class="pg-title">Dinners</div>
+    <div class="pg-sub" id="wk-sub"></div>
 
-      <div class="hero" id="hero-card">
-        <span class="hero-emoji" id="h-emoji">🌿</span>
-        <div class="hero-wk" id="h-wk">Week 1</div>
-        <div class="hero-name" id="h-name">Winter Rotation</div>
-        <div class="hero-theme" id="h-theme">Classic Family Meals</div>
+    <div class="hero" id="hero-card">
+      <span id="h-emoji" class="hero-emoji"></span>
+      <div id="h-wk" class="hero-wk"></div>
+      <div id="h-name" class="hero-name"></div>
+      <div id="h-theme" class="hero-theme"></div>
 
-        <div class="hero-chips">
-          <span class="chip chip-acc" id="h-protein">🍗 Turkey week</span>
-          <span class="chip chip-ghost" id="h-wx" style="display:none">🌤 72°F avg</span>
+      <div class="hero-chips">
+        <span id="h-protein" class="chip chip-acc"></span>
+      </div>
+
+      <div class="hero-nav">
+        <button class="hn-btn hn-prev" onclick="goWk(currentWeek-1)">←</button>
+        <div class="hn-sel">
+          <select id="wk-sel" onchange="goWk(parseInt(this.value))"></select>
         </div>
-
-        <div class="hero-nav">
-          <button class="hn-btn hn-prev" onclick="goWk(currentWeek-1)">← Prev</button>
-          <div class="hn-sel">
-            <select id="wk-sel" onchange="goWk(parseInt(this.value,10))"></select>
-          </div>
-          <button class="hn-btn hn-next" onclick="goWk(currentWeek+1)">Next →</button>
-        </div>
-      </div>
-
-      <div class="week-actions">
-        <button class="wa-btn" onclick="openProteinPicker()">🥩 Protein</button>
-        <button class="wa-btn" onclick="openPrepSheet()">📋 Week Prep</button>
-        <button class="wa-btn" onclick="openAllRecipes()">📖 All Recipes</button>
-        <button class="wa-btn acc" onclick="openThemePicker()">🎨 Theme</button>
-      </div>
-
-      <div class="sh">This Week</div>
-      <div id="day-list"></div>
-    </div>
-  </div>
-
-  <div id="s-shop" class="screen hidden">
-    <div class="sb"></div>
-    <div class="scroller">
-      <div class="pg-title">Shopping</div>
-      <div class="pg-sub" id="shop-sub">Week 1 · Check what you have</div>
-      <div class="shop-acts">
-        <button class="sa" onclick="clearChecked()">Clear ✓</button>
-        <button class="sa" onclick="copyList()">Copy 📋</button>
-      </div>
-      <div id="shop-content"></div>
-    </div>
-  </div>
-
-  <div id="s-cal" class="screen hidden">
-    <div class="sb"></div>
-    <div class="scroller">
-      <div class="pg-title">Calendar</div>
-      <div class="cal-nav">
-        <h2 id="cal-hd">Month</h2>
-        <button class="cal-nb" onclick="chMonth(-1)">‹</button>
-        <button class="cal-nb" onclick="chMonth(1)">›</button>
-      </div>
-      <div class="cal-wrap" id="cal-wrap"></div>
-      <button class="cal-dl-btn" onclick="dlICS('month')">⬇ Download Month iCal</button>
-      <div style="height:8px"></div>
-    </div>
-  </div>
-
-  <div id="s-more" class="screen hidden">
-    <div class="sb"></div>
-    <div class="scroller">
-      <div class="pg-title">More</div>
-
-      <div class="sh">iCal Export</div>
-      <div class="grp">
-        <div class="ical-row" onclick="dlICS('week')">
-          <div class="ical-ico" style="background:var(--blu-d)">📅</div>
-          <div class="ical-inf">
-            <div class="ical-t">This Week</div>
-            <div class="ical-d">Download Week <span id="ical-wn">1</span> .ics</div>
-          </div>
-          <div class="ical-chev">›</div>
-        </div>
-
-        <div class="ical-row" onclick="dlICS('month')">
-          <div class="ical-ico" style="background:var(--pur-d)">🗓</div>
-          <div class="ical-inf">
-            <div class="ical-t">This Month</div>
-            <div class="ical-d" id="ical-md">Download month .ics</div>
-          </div>
-          <div class="ical-chev">›</div>
-        </div>
-
-        <div class="ical-row" onclick="dlICS('all')">
-          <div class="ical-ico" style="background:var(--acc-d)">📆</div>
-          <div class="ical-inf">
-            <div class="ical-t">All Weeks</div>
-            <div class="ical-d">Import full rotation (.ics)</div>
-          </div>
-          <div class="ical-chev">›</div>
-        </div>
-      </div>
-
-      <div class="sh">Settings</div>
-      <div style="margin:0 16px 14px">
-        <div class="set-row">
-          <span class="set-lbl">📍 ZIP Code</span>
-          <input class="set-inp" id="s-zip" type="text" placeholder="97201" maxlength="5">
-        </div>
-        <div class="set-row">
-          <span class="set-lbl">📅 Week 1 Start</span>
-          <input class="set-inp" id="s-date" type="date">
-        </div>
-        <div class="set-row">
-          <span class="set-lbl">👨‍👩‍👧‍👦 Family</span>
-          <select class="set-inp" id="s-fam">
-            <option value="4">4 people</option>
-            <option value="2">2 people</option>
-            <option value="6">6 people</option>
-          </select>
-        </div>
-        <div class="set-row">
-          <span class="set-lbl">🥩 Default Protein</span>
-          <select class="set-inp" id="s-protein">
-            <option value="Chicken">Chicken</option>
-            <option value="Turkey">Turkey</option>
-            <option value="Pork">Pork</option>
-            <option value="Beef">Beef</option>
-            <option value="Fish">Fish</option>
-            <option value="Plant">Plant</option>
-            <option value="Mixed">Mixed</option>
-          </select>
-        </div>
-      </div>
-      <button class="save-btn" onclick="saveSettings()">Save Settings</button>
-
-      <div class="sh">About</div>
-      <div class="grp" style="padding:14px 16px">
-        <p style="font-size:13px;color:var(--t2);line-height:1.75;font-weight:500">
-          26-week rotating dinner plan · 100% gluten free · Acid reflux safe · Single main protein per week · Kid-friendly · Budget $75 to 100 per week · Taco Tuesday + Pizza Friday every week
-        </p>
-      </div>
-
-      <div style="height:10px"></div>
-    </div>
-  </div>
-
-  <div class="tab-bar">
-    <button class="tb active" onclick="switchTab('week',this)">
-      <div class="tb-ico">🍽</div>
-      <div class="tb-lbl">This Week</div>
-    </button>
-    <button class="tb" onclick="switchTab('shop',this)">
-      <div class="tb-ico">🛒</div>
-      <div class="tb-lbl">Shopping</div>
-    </button>
-    <button class="tb" onclick="switchTab('cal',this)">
-      <div class="tb-ico">📆</div>
-      <div class="tb-lbl">Calendar</div>
-    </button>
-    <button class="tb" onclick="switchTab('more',this)">
-      <div class="tb-ico">⋯</div>
-      <div class="tb-lbl">More</div>
-    </button>
-  </div>
-
-  <div id="ov-recipe" class="overlay" onclick="closeOverlay('ov-recipe',event)">
-    <div class="sheet">
-      <div class="sh-handle"></div>
-      <div class="sh-hdr">
-        <button class="sh-close" onclick="closeSheet('ov-recipe')">✕</button>
-        <div class="sh-title" id="r-title"></div>
-        <div class="sh-meta" id="r-meta"></div>
-      </div>
-      <div class="sh-body" id="r-body"></div>
-    </div>
-  </div>
-
-  <div id="ov-allrec" class="overlay" onclick="closeOverlay('ov-allrec',event)">
-    <div class="sheet">
-      <div class="sh-handle"></div>
-      <div class="sh-hdr">
-        <button class="sh-close" onclick="closeSheet('ov-allrec')">✕</button>
-        <div class="sh-title">All Recipes · Week <span id="ar-wn">1</span></div>
-      </div>
-      <div class="sh-body" id="ar-body"></div>
-    </div>
-  </div>
-
-  <div id="ov-prep" class="overlay" onclick="closeOverlay('ov-prep',event)">
-    <div class="sheet">
-      <div class="sh-handle"></div>
-      <div class="sh-hdr">
-        <button class="sh-close" onclick="closeSheet('ov-prep')">✕</button>
-        <div class="sh-title">Week Prep Guide</div>
-        <div class="sh-meta">
-          <span class="mc mc-t">Week <span class="prep-wn">1</span></span>
-          <span class="mc mc-g">✓ GF throughout</span>
-        </div>
-      </div>
-      <div class="sh-body" id="prep-body"></div>
-    </div>
-  </div>
-
-  <div id="ov-theme" class="overlay" onclick="closeOverlay('ov-theme',event)">
-    <div class="sheet">
-      <div class="sh-handle"></div>
-      <div class="sh-hdr">
-        <button class="sh-close" onclick="closeSheet('ov-theme')">✕</button>
-        <div class="sh-title">Choose Week Theme</div>
-      </div>
-      <div class="sh-body">
-        <div class="theme-grid" id="theme-grid"></div>
+        <button class="hn-btn hn-next" onclick="goWk(currentWeek+1)">→</button>
       </div>
     </div>
-  </div>
 
-  <div id="ov-protein" class="overlay" onclick="closeOverlay('ov-protein',event)">
-    <div class="sheet">
-      <div class="sh-handle"></div>
-      <div class="sh-hdr">
-        <button class="sh-close" onclick="closeSheet('ov-protein')">✕</button>
-        <div class="sh-title">Set Week Protein</div>
-      </div>
-      <div class="sh-body">
-        <div class="theme-grid" id="protein-grid"></div>
-      </div>
+    <div class="week-actions">
+      <button class="wa-btn" onclick="openThemePicker()">🎨 Theme</button>
     </div>
+
+    <div id="day-list"></div>
   </div>
+</div>
 
-  <div id="toast" class="toast"></div>
+<!-- SHOP -->
+<div id="s-shop" class="screen hidden">
+  <div class="sb"></div>
+  <div class="scroller">
+    <div class="pg-title">Shopping</div>
+    <div id="shop-content"></div>
+  </div>
+</div>
 
-  <script src="./js/data.js"></script>
-  <script src="./js/app.js"></script>
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tb active" onclick="switchTab('week',this)">🍽</button>
+  <button class="tb" onclick="switchTab('shop',this)">🛒</button>
+</div>
+
+<!-- THEME -->
+<div id="ov-theme" class="overlay">
+  <div class="sheet">
+    <div class="sh-hdr">
+      <div class="sh-title">Choose Theme</div>
+    </div>
+    <div id="theme-grid" class="theme-grid"></div>
+  </div>
+</div>
+
+<script src="./js/data.js"></script>
+<script src="./js/app.js"></script>
+
 </body>
 </html>
