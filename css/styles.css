@@ -1,0 +1,66 @@
+:root{
+  --bg:#000;
+  --bg2:#1C1C1E;
+  --bg3:#2C2C2E;
+  --t1:#fff;
+  --t2:rgba(255,255,255,.6);
+  --acc:#30D158;
+  --r:12px;
+  --tab-h:82px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+html,body{
+  height:100%;
+  overflow:hidden;
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);
+  color:var(--t1);
+}
+
+/* FIXED SCROLL */
+.scroller{
+  flex:1;
+  overflow-y:auto;
+  padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom));
+}
+
+/* TAB BAR FIX */
+.tab-bar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  height:calc(60px + env(safe-area-inset-bottom));
+  padding-bottom:env(safe-area-inset-bottom);
+  background:#111;
+  display:flex;
+}
+
+/* BUTTON ROUND FIX */
+button{
+  border-radius:12px;
+}
+
+/* CARDS */
+.day-card{
+  background:var(--bg2);
+  margin:10px;
+  padding:12px;
+  border-radius:12px;
+}
+
+/* THEME GRID */
+.theme-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  padding:10px;
+}
+
+.theme-card{
+  background:var(--bg3);
+  padding:12px;
+  border-radius:12px;
+}
