@@ -1,15 +1,16 @@
 import {
-  TOTAL_WEEKS,
   THEMES,
-  BASE_WEEKS,
-  THEMED_WEEKS,
+  TOTAL_WEEKS,
   PROTEIN_OPTIONS,
   PROTEIN_META,
   PROTO_ICONS,
   TAG_CLS,
   CATS,
-  CAT_ORDER
-} from './data.js';
+  CAT_ORDER,
+  ALL_PLANS
+} from './data/index.js';
+
+import { getFilteredPlans, getPlanForWeekIndex } from './data/planners.js';
 
 import {
   $,
